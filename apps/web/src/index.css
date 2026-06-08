@@ -1,0 +1,289 @@
+:root {
+  font-family: system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #f8f9fa;
+  --color-primary: #1a73e8;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  direction: rtl;
+  text-align: right;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-text {
+  background: transparent;
+  color: var(--color-primary);
+  padding: 0.5rem;
+}
+
+.btn-google {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #dadce0;
+  color: #3c4043;
+  font-weight: 500;
+}
+
+.google-icon {
+  display: inline-flex;
+  width: 1.25rem;
+  height: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #4285f4;
+}
+
+.login-page,
+.terms-page,
+.app-layout {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.login-card {
+  margin-top: 4rem;
+  text-align: center;
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+
+.privacy-notice {
+  background: #e8f0fe;
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.drop-zone {
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  background: #fff;
+}
+
+.drop-zone:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.file-name {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.terms-checkbox input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+}
+
+.error-message {
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+}
+
+.summary-label {
+  margin: 0;
+  color: #64748b;
+}
+
+.summary-amount {
+  margin: 0.25rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.summary-sub {
+  margin: 0;
+  color: #64748b;
+}
+
+.waterfall {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.waterfall-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.waterfall-row--deduction {
+  color: #64748b;
+  padding-inline-start: 1rem;
+}
+
+.waterfall-row--net {
+  font-weight: 700;
+  border-top: 2px solid #1a1a1a;
+  border-bottom: none;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.tab {
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+}
+
+.tab--active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.section-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.section-table th,
+.section-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: right;
+}
+
+.flag-banner {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  margin: 0.5rem 0;
+}
+
+.flag-banner--warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.flag-banner--info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.disclaimer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.terms-content section {
+  margin-bottom: 1.5rem;
+}
+
+.terms-content h2 {
+  font-size: 1.125rem;
+}
+
+.placeholder-text,
+.loading,
+.config-error {
+  color: #64748b;
+}
+
+.config-error {
+  padding: 2rem;
+  text-align: center;
+}
+
+.terms-updated {
+  margin-top: 2rem;
+  color: #64748b;
+}

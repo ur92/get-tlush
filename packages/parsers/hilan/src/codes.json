@@ -1,0 +1,163 @@
+{
+  "version": "1.0.0",
+  "vendor": "hilan",
+  "mappingStrategy": "code_first",
+  "codes": {
+    "001": {
+      "category": "earnings.base_salary",
+      "labelKey": "lines.baseSalary",
+      "explanationKey": "explain.earnings.baseSalary",
+      "rawLabelPatterns": ["שכר יסוד", "שכר בסיס"]
+    },
+    "002": {
+      "category": "earnings.role_supplement",
+      "labelKey": "lines.globalSupplement",
+      "explanationKey": "explain.earnings.roleSupplement",
+      "rawLabelPatterns": ["ש.נוספות גלובלי", "ש.נוספות"]
+    },
+    "100": {
+      "category": "earnings.travel",
+      "labelKey": "lines.travel",
+      "explanationKey": "explain.earnings.travel",
+      "rawLabelPatterns": ["נסיעות", "דמי נסיעות"]
+    },
+    "107": {
+      "category": "equity.rsu_vesting",
+      "labelKey": "lines.rsuVesting",
+      "explanationKey": "explain.equity.rsuVesting",
+      "isOneTime": true,
+      "rawLabelPatterns": ["השלמת מילואים הפרש", "הפרש מילואים", "RSU", "הקצאת מניות"]
+    },
+    "111": {
+      "category": "equity.rsu_vesting",
+      "labelKey": "lines.rsuVestingSupplement",
+      "explanationKey": "explain.equity.rsuVesting",
+      "isOneTime": true,
+      "rawLabelPatterns": ["עבודה במילואים", "מילואים", "RSU vest"]
+    },
+    "184": {
+      "category": "earnings.other",
+      "labelKey": "lines.youthWage",
+      "explanationKey": "explain.earnings.other",
+      "rawLabelPatterns": ["שכר ילדים", "תשלום ילדים"]
+    },
+    "202": {
+      "category": "equity.capital_gain_value",
+      "labelKey": "lines.capitalGainValue",
+      "explanationKey": "explain.equity.capitalGainValue",
+      "isImputed": true,
+      "isOneTime": true,
+      "rawLabelPatterns": ["שווי מס הוני", "שווי הוני"]
+    },
+    "203": {
+      "category": "equity.ordinary_income_value",
+      "labelKey": "lines.ordinaryIncomeValue",
+      "explanationKey": "explain.equity.ordinaryIncomeValue",
+      "isImputed": true,
+      "isOneTime": true,
+      "rawLabelPatterns": ["שווי מס פרותי", "שווי פירותי"]
+    },
+    "302": {
+      "category": "equity.ordinary_income_value",
+      "labelKey": "lines.ordinaryIncomeValue",
+      "explanationKey": "explain.equity.ordinaryIncomeValue",
+      "isImputed": true
+    },
+    "497": {
+      "category": "earnings.other",
+      "labelKey": "lines.paymentGrossUp",
+      "explanationKey": "explain.earnings.grossUp",
+      "rawLabelPatterns": ["גילום תשלומי נט"]
+    },
+    "602": {
+      "category": "deduction.advance",
+      "labelKey": "lines.advanceArrears",
+      "explanationKey": "explain.deduction.advance",
+      "isOneTime": true,
+      "rawLabelPatterns": ["מקדמה/מפרעה", "מקדמה", "הפרעה"]
+    },
+    "607": {
+      "category": "deduction.other",
+      "labelKey": "lines.mealsDeduction",
+      "explanationKey": "explain.deduction.meals",
+      "rawLabelPatterns": ["ניכוי ארוחות"]
+    },
+    "701": {
+      "category": "earnings.reserve_duty",
+      "labelKey": "lines.reserveDutyCompletion",
+      "explanationKey": "explain.earnings.reserveDuty",
+      "isOneTime": true,
+      "rawLabelPatterns": ["השלמת מילואים"]
+    },
+    "1160": {
+      "category": "equity.espp_purchase",
+      "labelKey": "lines.esppRate",
+      "explanationKey": "explain.equity.esppRate",
+      "rawLabelPatterns": ["אחוז espp", "espp אחוז", "ESPP"]
+    },
+    "1660": {
+      "category": "equity.espp_purchase",
+      "labelKey": "lines.esppDeduction",
+      "explanationKey": "explain.equity.esppDeduction",
+      "rawLabelPatterns": ["ניכוי espp", "espp ניכוי"]
+    },
+    "012": {
+      "category": "deduction.pension_employee",
+      "labelKey": "lines.pensionEmployee",
+      "explanationKey": "explain.deduction.pension",
+      "sourceRegion": "funds",
+      "rawLabelPatterns": ["קרן פנסיה", "פנסיה"]
+    },
+    "205": {
+      "category": "deduction.keren_hishtalmut_employee",
+      "labelKey": "lines.kerenHishtalmutEmployee",
+      "explanationKey": "explain.deduction.kerenHishtalmut",
+      "sourceRegion": "funds",
+      "rawLabelPatterns": ["קרן השתלמות", "השתלמות"]
+    },
+    "481": {
+      "category": "imputed.company_car",
+      "labelKey": "lines.mobileValue",
+      "explanationKey": "explain.imputed.mobile",
+      "isImputed": true,
+      "rawLabelPatterns": ["שווי ט.נייד", "שווי טלפון"]
+    },
+    "581": {
+      "category": "imputed.other",
+      "labelKey": "lines.healthInsuranceValue",
+      "explanationKey": "explain.imputed.healthInsurance",
+      "isImputed": true,
+      "rawLabelPatterns": ["ביטוח בריאות", "שווי ביטוח"]
+    },
+    "681": {
+      "category": "imputed.meals",
+      "labelKey": "lines.mealsValue",
+      "explanationKey": "explain.imputed.meals",
+      "isImputed": true,
+      "rawLabelPatterns": ["שווי ארוחות"]
+    },
+    "8941": {
+      "category": "imputed.keren_hishtalmut",
+      "labelKey": "lines.pensionContributionValue",
+      "explanationKey": "explain.imputed.kerenHishtalmut",
+      "isImputed": true,
+      "rawLabelPatterns": ["שווי הפרשה לקצב", "שווי פנסיה"]
+    },
+    "3514": {
+      "category": "imputed.other",
+      "labelKey": "lines.severanceCap",
+      "explanationKey": "explain.imputed.severanceCap",
+      "isImputed": true,
+      "rawLabelPatterns": ["פיצויים על תקרה"]
+    }
+  },
+  "summaryLabels": {
+    "totalEarnings": ["סך-כל התשלומים", "סה\"כ תשלומים"],
+    "netPay": ["נטו לתשלום"],
+    "netSalary": ["שכר נטו"],
+    "statutoryDeductions": ["ניכויי חובה-מסים", "ניכויי חובה - מסים"],
+    "obligatoryDeductions": ["ניכויי התחייבות", "סה\"כ ניכויי התחייבות"],
+    "imputedTotal": ["סה\"כ זקיפות שכר"],
+    "taxableGross": ["ברוטו לב.ל ב.ק.", "הכנסה חייבת במס", "ברוטו לב.לאומי"]
+  }
+}

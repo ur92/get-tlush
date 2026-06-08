@@ -1,0 +1,23 @@
+{
+  "name": "@tlush/pdf-extract",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^5.2.133"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "vendor": "merkava",
+  "version": "1.0.0",
+  "mappingStrategy": "label_first",
+  "codes": {
+    "DB-OFEX-COMBINED": { "category": "earnings.base_salary", "explanationKey": "explain.earnings.ofexCombined" },
+    "DB-OFEX-SUPP": { "category": "earnings.overtime", "explanationKey": "explain.earnings.ofexSupplement" },
+    "DB-ECON-LAW": { "category": "earnings.economic_adjustment", "explanationKey": "explain.earnings.economicAdjustment" },
+    "DB-SENIORITY": { "category": "earnings.seniority", "explanationKey": "explain.earnings.seniority" },
+    "DB-ROLE": { "category": "earnings.role_supplement", "explanationKey": "explain.earnings.roleSupplement" },
+    "DB-KH-IMPUTED": { "category": "imputed.keren_hishtalmut", "explanationKey": "explain.imputed.kerenHishtalmut" },
+    "DB-INCOME-TAX": { "category": "deduction.income_tax", "explanationKey": "explain.deduction.incomeTax" },
+    "DB-NI": { "category": "deduction.national_insurance", "explanationKey": "explain.deduction.nationalInsurance" },
+    "DB-HEALTH": { "category": "deduction.health_tax", "explanationKey": "explain.deduction.healthTax" },
+    "DB-NI-DIFF": { "category": "deduction.ni_adjustment", "explanationKey": "explain.deduction.niAdjustment" },
+    "DB-HEALTH-DIFF": { "category": "deduction.health_adjustment", "explanationKey": "explain.deduction.healthAdjustment" },
+    "DB-PENSION-HAREL": { "category": "deduction.pension_employee", "explanationKey": "explain.deduction.pension" },
+    "DB-KH-INTL": { "category": "deduction.keren_hishtalmut_employee", "explanationKey": "explain.deduction.kerenHishtalmut" },
+    "DB-GEMEL-GAL": { "category": "deduction.gemel", "explanationKey": "explain.deduction.gemel" },
+    "DB-UNION": { "category": "deduction.union", "explanationKey": "explain.deduction.union" }
+  },
+  "labelPatterns": [
+    { "patterns": ["משולב אופק חדש", "שכר אופק משולב"], "explanationKey": "explain.earnings.ofexCombined" },
+    { "patterns": ["ש.נוספות אופק חדש", "שעות נוספות אופק"], "explanationKey": "explain.earnings.ofexSupplement" },
+    { "patterns": ["חוק הת.כלכלית", "חוק התייעלות כלכלית"], "explanationKey": "explain.earnings.economicAdjustment" },
+    { "patterns": ["תוספת ותק", "תוספת ותק בהוראה"], "explanationKey": "explain.earnings.seniority" },
+    { "patterns": ["תוספת מחנכת", "תוספת תפקיד", "מקדם משרה"], "explanationKey": "explain.earnings.roleSupplement" },
+    { "patterns": ["שווי קה\"ש לצורך מס", "שווי קרן השתלמות למס"], "explanationKey": "explain.imputed.kerenHishtalmut" },
+    { "patterns": ["מס הכנסה"], "explanationKey": "explain.deduction.incomeTax" },
+    { "patterns": ["ביטוח לאומי", "ב.לאומי עובד"], "explanationKey": "explain.deduction.nationalInsurance" },
+    { "patterns": ["דמי בריאות", "ביטוח בריאות עובד"], "explanationKey": "explain.deduction.healthTax" },
+    { "patterns": ["הפרשי ביטוח לאומי", "הפרש ב.לאומי"], "explanationKey": "explain.deduction.niAdjustment" },
+    { "patterns": ["הפרשי ב. בריאות", "הפרשי בריאות"], "explanationKey": "explain.deduction.healthAdjustment" },
+    { "patterns": ["הראל מנוף - פנסיה", "הראל מנוף פנסיה"], "explanationKey": "explain.deduction.pension" },
+    { "patterns": ["ק.השת)הסת( בינ\"ל", "קרן השתלמות בינלאומית"], "explanationKey": "explain.deduction.kerenHishtalmut" },
+    { "patterns": ["גל גמל", "קופת גמל גל"], "explanationKey": "explain.deduction.gemel" },
+    { "patterns": ["ניכוי ועד", "דמי ועד"], "explanationKey": "explain.deduction.union" }
+  ]
+}

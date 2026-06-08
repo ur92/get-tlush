@@ -1,0 +1,25 @@
+{
+  "name": "@tlush/knowledge",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./locales/he.json": "./locales/he.json",
+    "./shared/taxes.json": "./shared/taxes.json",
+    "./vendors/hilan.json": "./vendors/hilan.json",
+    "./vendors/merkava.json": "./vendors/merkava.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "typescript": "^5.8.3"
+  }
+}

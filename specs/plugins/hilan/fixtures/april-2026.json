@@ -1,0 +1,276 @@
+{
+  "vendor": {
+    "id": "hilan",
+    "parserVersion": "1.0.0",
+    "displayNameKey": "vendors.hilan",
+    "detectionConfidence": 0.95
+  },
+  "period": {
+    "month": 4,
+    "year": 2026,
+    "label": "04/2026"
+  },
+  "employee": {
+    "employeeId": "REDACTED",
+    "nationalId": "REDACTED",
+    "name": "REDACTED"
+  },
+  "employer": {
+    "name": "ג'ייפרוג בע\"מ",
+    "registrationId": "514130491",
+    "payrollId": "921438545"
+  },
+  "earnings": [
+    {
+      "code": "001",
+      "rawLabel": "שכר יסוד",
+      "labelKey": "lines.baseSalary",
+      "amount": 35000.0,
+      "category": "earnings.base_salary",
+      "explanationKey": "explain.earnings.baseSalary",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "002",
+      "rawLabel": "ש.נוספות גלובלי",
+      "labelKey": "lines.globalSupplement",
+      "amount": 15000.0,
+      "category": "earnings.role_supplement",
+      "explanationKey": "explain.earnings.roleSupplement",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "100",
+      "rawLabel": "נסיעות",
+      "labelKey": "lines.travel",
+      "amount": 600.0,
+      "category": "earnings.travel",
+      "explanationKey": "explain.earnings.travel",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "107",
+      "rawLabel": "השלמת מילואים הפרש",
+      "labelKey": "lines.rsuVesting",
+      "amount": 3148.06,
+      "category": "equity.rsu_vesting",
+      "explanationKey": "explain.equity.rsuVesting",
+      "isOneTime": true,
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high",
+      "metadata": {
+        "periodRef": "03/26"
+      }
+    },
+    {
+      "code": "111",
+      "rawLabel": "עבודה במילואים",
+      "labelKey": "lines.reserveDuty",
+      "amount": 6868.25,
+      "quantity": 25.0,
+      "rate": 274.73,
+      "unit": "hours",
+      "category": "earnings.reserve_duty",
+      "explanationKey": "explain.earnings.reserveDuty",
+      "isOneTime": true,
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "497",
+      "rawLabel": "גילום תשלומי נט",
+      "labelKey": "lines.paymentGrossUp",
+      "amount": 100.0,
+      "category": "earnings.other",
+      "explanationKey": "explain.earnings.grossUp",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "1160",
+      "rawLabel": "אחוז espp",
+      "labelKey": "lines.esppRate",
+      "amount": 0.15,
+      "category": "equity.espp_purchase",
+      "explanationKey": "explain.equity.esppRate",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "581",
+      "rawLabel": "ביטוח בריאות",
+      "labelKey": "lines.healthInsuranceValue",
+      "amount": 2272.73,
+      "category": "imputed.other",
+      "explanationKey": "explain.imputed.healthInsurance",
+      "isImputed": true,
+      "sourceRegion": "imputed",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "8941",
+      "rawLabel": "שווי הפרשה לקצב",
+      "labelKey": "lines.pensionContributionValue",
+      "amount": 668.28,
+      "category": "imputed.keren_hishtalmut",
+      "explanationKey": "explain.imputed.kerenHishtalmut",
+      "isImputed": true,
+      "sourceRegion": "imputed",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "681",
+      "rawLabel": "שווי ארוחות",
+      "labelKey": "lines.mealsValue",
+      "amount": 1000.0,
+      "category": "imputed.meals",
+      "explanationKey": "explain.imputed.meals",
+      "isImputed": true,
+      "sourceRegion": "imputed",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "3514",
+      "rawLabel": "פיצויים על תקרה",
+      "labelKey": "lines.severanceCap",
+      "amount": 365.0,
+      "category": "imputed.other",
+      "explanationKey": "explain.imputed.severanceCap",
+      "isImputed": true,
+      "sourceRegion": "imputed",
+      "page": 1,
+      "confidence": "high"
+    }
+  ],
+  "deductions": [
+    {
+      "code": "INCOME_TAX",
+      "rawLabel": "מס הכנסה",
+      "labelKey": "lines.incomeTax",
+      "amount": 17356.0,
+      "category": "deduction.income_tax",
+      "explanationKey": "explain.deduction.incomeTax",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "NI",
+      "rawLabel": "ביטוח לאומי",
+      "labelKey": "lines.nationalInsurance",
+      "amount": 3175.0,
+      "category": "deduction.national_insurance",
+      "explanationKey": "explain.deduction.nationalInsurance",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "HEALTH",
+      "rawLabel": "ביטוח בריאות",
+      "labelKey": "lines.healthTax",
+      "amount": 2534.0,
+      "category": "deduction.health_tax",
+      "explanationKey": "explain.deduction.healthTax",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "012",
+      "rawLabel": "קרן פנסיה פניקס קצבה שכיר-תג.",
+      "labelKey": "lines.pensionEmployee",
+      "amount": 3250.0,
+      "rate": 6.5,
+      "unit": "percent",
+      "category": "deduction.pension_employee",
+      "explanationKey": "explain.deduction.pension",
+      "sourceRegion": "funds",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "205",
+      "rawLabel": "מיטב דש קהל קרן השתלמות",
+      "labelKey": "lines.kerenHishtalmutEmployee",
+      "amount": 1178.4,
+      "rate": 2.5,
+      "unit": "percent",
+      "category": "deduction.keren_hishtalmut_employee",
+      "explanationKey": "explain.deduction.kerenHishtalmut",
+      "sourceRegion": "funds",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "1660",
+      "rawLabel": "ניכוי espp",
+      "labelKey": "lines.esppDeduction",
+      "amount": 7500.0,
+      "category": "equity.espp_purchase",
+      "explanationKey": "explain.equity.esppDeduction",
+      "sourceRegion": "deductions",
+      "page": 2,
+      "confidence": "high"
+    }
+  ],
+  "totals": {
+    "grossCash": 50600.0,
+    "taxableGross": 62864.0,
+    "niBase": 62864.0,
+    "totalEarnings": 60716.31,
+    "totalDeductions": 23065.0,
+    "netPay": 26730.51,
+    "incomeTax": 17356.0,
+    "ni": 3175.0,
+    "healthTax": 2534.0,
+    "pensionEmployee": 3250.0,
+    "pensionEmployer": 4165.0,
+    "kerenHishtalmutEmployee": 1178.4,
+    "kerenHishtalmutEmployer": 3928.0
+  },
+  "context": {
+    "creditPoints": 6.75,
+    "creditPointsBreakdown": [
+      { "points": 2.25, "reasonKey": "creditPoints.resident" },
+      { "points": 2.5, "reasonKey": "creditPoints.childAge4to5" },
+      { "points": 2.0, "reasonKey": "creditPoints.childAge6to17" }
+    ],
+    "equity": {
+      "hasEquity": true,
+      "esppDeduction": 7500.0
+    },
+    "ytd": {
+      "grossCash": 233464.0,
+      "taxableGross": 290150.0,
+      "incomeTax": 62958.0,
+      "ni": 28711.0,
+      "netPay": 99644.0
+    },
+    "leave": {
+      "vacationDays": 22.0,
+      "vacationBalance": 23.5,
+      "sickDays": 18.0,
+      "sickBalance": 7.0
+    }
+  },
+  "flags": ["equity_espp", "reserve_duty", "pension_present", "keren_hishtalmut_present", "multi_page_ytd"],
+  "parseMeta": {
+    "pageCount": 2,
+    "amountTolerance": 0.01,
+    "warnings": []
+  }
+}

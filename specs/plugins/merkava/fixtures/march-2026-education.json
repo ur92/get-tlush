@@ -1,0 +1,244 @@
+{
+  "vendor": {
+    "id": "merkava",
+    "parserVersion": "1.0.0",
+    "displayNameKey": "vendors.merkava",
+    "detectionConfidence": 0.92
+  },
+  "period": {
+    "month": 3,
+    "year": 2026,
+    "label": "03/2026"
+  },
+  "employee": {
+    "employeeId": "REDACTED",
+    "nationalId": "REDACTED",
+    "name": "REDACTED",
+    "roles": ["מחנכת כיתה", "סגנית מנהלת"],
+    "hours": 168.0,
+    "seniorityYears": 14.5,
+    "grade": "ד3",
+    "department": "בית ספר יסודי"
+  },
+  "employer": {
+    "name": "משרד החינוך",
+    "registrationId": "REDACTED",
+    "payrollId": "DB-105292-073997"
+  },
+  "earnings": [
+    {
+      "code": "DB-OFEX-COMBINED",
+      "rawLabel": "משולב אופק חדש",
+      "labelKey": "lines.ofexCombined",
+      "amount": 12450.0,
+      "quantity": 168.0,
+      "rate": 74.11,
+      "unit": "hours",
+      "category": "earnings.base_salary",
+      "explanationKey": "explain.earnings.ofexCombined",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high",
+      "metadata": {
+        "ofexGrade": "ד3",
+        "seniorityYears": 14.5
+      }
+    },
+    {
+      "code": "DB-OFEX-SUPP",
+      "rawLabel": "ש.נוספות אופק חדש",
+      "labelKey": "lines.ofexSupplement",
+      "amount": 2180.0,
+      "quantity": 12.0,
+      "rate": 181.67,
+      "unit": "hours",
+      "category": "earnings.overtime",
+      "explanationKey": "explain.earnings.ofexSupplement",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-ROLE",
+      "rawLabel": "תוספת מחנכת",
+      "labelKey": "lines.roleSupplement",
+      "amount": 1850.0,
+      "category": "earnings.role_supplement",
+      "explanationKey": "explain.earnings.roleSupplement",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-ECON-LAW",
+      "rawLabel": "חוק הת.כלכלית",
+      "labelKey": "lines.economicLaw",
+      "amount": 1760.0,
+      "category": "earnings.economic_adjustment",
+      "explanationKey": "explain.earnings.economicAdjustment",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-KH-IMPUTED",
+      "rawLabel": "שווי קה\"ש לצורך מס",
+      "labelKey": "lines.kerenHishtalmutImputed",
+      "amount": 412.0,
+      "category": "imputed.keren_hishtalmut",
+      "explanationKey": "explain.imputed.kerenHishtalmut",
+      "isImputed": true,
+      "sourceRegion": "imputed",
+      "page": 1,
+      "confidence": "high"
+    }
+  ],
+  "deductions": [
+    {
+      "code": "DB-INCOME-TAX",
+      "rawLabel": "מס הכנסה",
+      "labelKey": "lines.incomeTax",
+      "amount": 1428.0,
+      "category": "deduction.income_tax",
+      "explanationKey": "explain.deduction.incomeTax",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-NI",
+      "rawLabel": "ביטוח לאומי",
+      "labelKey": "lines.nationalInsurance",
+      "amount": 486.5,
+      "category": "deduction.national_insurance",
+      "explanationKey": "explain.deduction.nationalInsurance",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-HEALTH",
+      "rawLabel": "דמי בריאות",
+      "labelKey": "lines.healthTax",
+      "amount": 312.0,
+      "category": "deduction.health_tax",
+      "explanationKey": "explain.deduction.healthTax",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-NI-DIFF",
+      "rawLabel": "הפרשי ביטוח לאומי",
+      "labelKey": "lines.niAdjustment",
+      "amount": 48.25,
+      "category": "deduction.ni_adjustment",
+      "explanationKey": "explain.deduction.niAdjustment",
+      "isOneTime": true,
+      "sourceRegion": "deductions",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-HEALTH-DIFF",
+      "rawLabel": "הפרשי ב. בריאות",
+      "labelKey": "lines.healthAdjustment",
+      "amount": 22.15,
+      "category": "deduction.health_adjustment",
+      "explanationKey": "explain.deduction.healthAdjustment",
+      "isOneTime": true,
+      "sourceRegion": "deductions",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-PENSION-HAREL",
+      "rawLabel": "הראל מנוף - פנסיה",
+      "labelKey": "lines.pensionHarel",
+      "amount": 456.0,
+      "rate": 6.0,
+      "unit": "percent",
+      "category": "deduction.pension_employee",
+      "explanationKey": "explain.deduction.pension",
+      "sourceRegion": "funds",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-KH-INTL",
+      "rawLabel": "ק.השת)הסת( בינ\"ל",
+      "labelKey": "lines.kerenHishtalmutIntl",
+      "amount": 285.0,
+      "rate": 2.5,
+      "unit": "percent",
+      "category": "deduction.keren_hishtalmut_employee",
+      "explanationKey": "explain.deduction.kerenHishtalmut",
+      "sourceRegion": "funds",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "DB-GEMEL-GAL",
+      "rawLabel": "גל גמל",
+      "labelKey": "lines.gemelGal",
+      "amount": 100.0,
+      "category": "deduction.gemel",
+      "explanationKey": "explain.deduction.gemel",
+      "sourceRegion": "funds",
+      "page": 1,
+      "confidence": "high"
+    }
+  ],
+  "totals": {
+    "grossCash": 18240.0,
+    "taxableGross": 18652.0,
+    "niBase": 18652.0,
+    "totalEarnings": 18240.0,
+    "totalDeductions": 3347.53,
+    "netPay": 14892.47,
+    "incomeTax": 1428.0,
+    "ni": 486.5,
+    "healthTax": 312.0,
+    "pensionEmployee": 456.0,
+    "pensionEmployer": 1094.4,
+    "kerenHishtalmutEmployee": 285.0,
+    "kerenHishtalmutEmployer": 855.0
+  },
+  "context": {
+    "creditPoints": 9.25,
+    "creditPointsBreakdown": [
+      { "points": 2.25, "reasonKey": "creditPoints.resident" },
+      { "points": 2.25, "reasonKey": "creditPoints.female" },
+      { "points": 2.0, "reasonKey": "creditPoints.childAge6to17" },
+      { "points": 2.75, "reasonKey": "creditPoints.academicDegree" }
+    ],
+    "ytd": {
+      "grossCash": 54720.0,
+      "taxableGross": 55956.0,
+      "incomeTax": 4284.0,
+      "ni": 1459.5,
+      "healthTax": 936.0,
+      "netPay": 44677.41,
+      "pensionEmployee": 1368.0
+    },
+    "leave": {
+      "vacationDays": 2.0,
+      "vacationBalance": 18.5,
+      "sickDays": 1.0,
+      "sickBalance": 42.0
+    }
+  },
+  "flags": [
+    "ni_adjustment",
+    "health_adjustment",
+    "imputed_income_present",
+    "pension_present",
+    "keren_hishtalmut_present",
+    "multi_page_ytd"
+  ],
+  "parseMeta": {
+    "pageCount": 2,
+    "amountTolerance": 0.01,
+    "warnings": ["fixture_synthetic_no_source_pdf"]
+  }
+}

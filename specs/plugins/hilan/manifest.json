@@ -1,0 +1,37 @@
+{
+  "plugin": "hilan",
+  "version": "1.0.0",
+  "displayNameKey": "vendors.hilan",
+  "amountTolerance": 0.01,
+  "detection": {
+    "minConfidence": 0.8,
+    "negativeVendor": "merkava"
+  },
+  "fixtures": [
+    {
+      "id": "april-2026",
+      "description": "April 2026 — standard month with miluim payments and ESPP",
+      "pdf": "tests/fixtures/pdf/hilan-april-2026.pdf",
+      "expected": "fixtures/april-2026.json",
+      "sourcePdf": "FileDownload (8).pdf",
+      "assertions": {
+        "totals.netPay": 26730.51,
+        "totals.totalEarnings": 60716.31
+      }
+    },
+    {
+      "id": "may-2026",
+      "description": "May 2026 — RSU vesting correction: negative net salary, large imputed zkifot",
+      "pdf": "tests/fixtures/pdf/hilan-may-2026.pdf",
+      "expected": "fixtures/may-2026.json",
+      "sourcePdf": "FileDownload (7).pdf",
+      "requiredFlags": ["negative_gross", "equity_vesting", "imputed_income_present", "equity_espp"],
+      "assertions": {
+        "totals.netPay": 57226.2,
+        "totals.totalEarnings": 52897.0,
+        "totals.printedNetSalary": -316654.8,
+        "totals.taxableGross": 1150482.71
+      }
+    }
+  ]
+}

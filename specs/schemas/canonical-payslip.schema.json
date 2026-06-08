@@ -1,0 +1,344 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ur92/get-tlush/schemas/canonical-payslip.schema.json",
+  "title": "CanonicalPayslip",
+  "description": "Vendor-agnostic normalized payslip produced by parser plugins. Employee block is for local parsing/UI only — must be stripped before analytics ingest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "vendor",
+    "period",
+    "earnings",
+    "deductions",
+    "totals",
+    "context",
+    "flags"
+  ],
+  "properties": {
+    "vendor": {
+      "$ref": "#/definitions/Vendor"
+    },
+    "period": {
+      "$ref": "#/definitions/Period"
+    },
+    "employee": {
+      "$ref": "#/definitions/Employee",
+      "description": "PII — present for parsing and local UI; excluded from anonymized analytics records."
+    },
+    "employer": {
+      "$ref": "#/definitions/Employer"
+    },
+    "earnings": {
+      "type": "array",
+      "description": "Cash and gross payment lines (may include negative corrections).",
+      "items": { "$ref": "line-item.schema.json" }
+    },
+    "deductions": {
+      "type": "array",
+      "description": "Statutory and voluntary deductions, employer contributions shown as deductions where applicable.",
+      "items": { "$ref": "line-item.schema.json" }
+    },
+    "totals": {
+      "$ref": "#/definitions/Totals"
+    },
+    "context": {
+      "$ref": "#/definitions/Context"
+    },
+    "flags": {
+      "type": "array",
+      "description": "Machine-readable anomalies and feature markers for UI banners and analytics.",
+      "items": { "$ref": "#/definitions/PayslipFlag" },
+      "uniqueItems": true
+    },
+    "parseMeta": {
+      "$ref": "#/definitions/ParseMeta"
+    }
+  },
+  "definitions": {
+    "Vendor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "parserVersion"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": ["hilan", "merkava", "unknown"],
+          "description": "Detected payroll system identifier."
+        },
+        "parserVersion": {
+          "type": "string",
+          "description": "Semver of the parser plugin that produced this document.",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"
+        },
+        "displayNameKey": {
+          "type": "string",
+          "description": "i18n key for vendor display name.",
+          "pattern": "^vendors\\.[a-z]+$"
+        },
+        "detectionConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Registry detection score when parsed."
+        }
+      }
+    },
+    "Period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["month", "year"],
+      "properties": {
+        "month": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 2000,
+          "maximum": 2100
+        },
+        "label": {
+          "type": "string",
+          "description": "Raw period label from PDF if present (e.g. '04/2026')."
+        }
+      }
+    },
+    "Employee": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Personally identifiable fields — never exported to analytics.",
+      "properties": {
+        "employeeId": {
+          "type": "string",
+          "description": "Employer employee number."
+        },
+        "nationalId": {
+          "type": "string",
+          "description": "Teudat zehut or equivalent — treat as highly sensitive."
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name as printed on payslip."
+        },
+        "roles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Job titles or role descriptions (e.g. homeroom teacher)."
+        },
+        "hours": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total paid hours when reported."
+        },
+        "seniorityYears": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Teaching or employment seniority when present."
+        },
+        "grade": {
+          "type": "string",
+          "description": "Salary grade or Ofek grade code."
+        },
+        "department": {
+          "type": "string"
+        }
+      }
+    },
+    "Employer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "registrationId": {
+          "type": "string",
+          "description": "ח.פ / מספר מעסיק."
+        },
+        "payrollId": {
+          "type": "string",
+          "description": "Vendor-specific employer or site code."
+        }
+      }
+    },
+    "Totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grossCash",
+        "taxableGross",
+        "netPay",
+        "incomeTax",
+        "ni",
+        "healthTax"
+      ],
+      "properties": {
+        "grossCash": {
+          "type": "number",
+          "description": "Sum of cash earnings before deductions (may be negative on correction payslips)."
+        },
+        "taxableGross": {
+          "type": "number",
+          "description": "Cash gross plus imputed taxable income (shovi, equity zkifa, keren hishtalmut value)."
+        },
+        "niBase": {
+          "type": "number",
+          "description": "Bituach Leumi assessment base when explicitly stated."
+        },
+        "totalEarnings": {
+          "type": "number",
+          "description": "Printed total payments line when distinct from grossCash."
+        },
+        "totalDeductions": {
+          "type": "number",
+          "description": "Printed total deductions (positive number)."
+        },
+        "netPay": {
+          "type": "number",
+          "description": "Net amount deposited / נטו לתשלום."
+        },
+        "incomeTax": {
+          "type": "number",
+          "description": "Employee income tax withheld (positive deduction amount)."
+        },
+        "ni": {
+          "type": "number",
+          "description": "Employee National Insurance (Bituach Leumi) portion."
+        },
+        "healthTax": {
+          "type": "number",
+          "description": "Employee health tax (דמי בריאות)."
+        },
+        "pensionEmployee": {
+          "type": "number",
+          "description": "Employee pension contribution."
+        },
+        "pensionEmployer": {
+          "type": "number",
+          "description": "Employer pension contribution when shown."
+        },
+        "kerenHishtalmutEmployee": {
+          "type": "number"
+        },
+        "kerenHishtalmutEmployer": {
+          "type": "number"
+        }
+      }
+    },
+    "Context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["creditPoints"],
+      "properties": {
+        "creditPoints": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total nekudot zikui applied this period."
+        },
+        "creditPointsBreakdown": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["points", "reasonKey"],
+            "properties": {
+              "points": { "type": "number" },
+              "reasonKey": {
+                "type": "string",
+                "description": "i18n key (e.g. creditPoints.resident, creditPoints.child)."
+              }
+            }
+          }
+        },
+        "equity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "hasEquity": { "type": "boolean" },
+            "rsuVesting": {
+              "type": "number",
+              "description": "RSU vesting cash or imputed amount this period."
+            },
+            "esppDeduction": {
+              "type": "number",
+              "description": "ESPP purchase or deduction line total."
+            },
+            "capitalGainValue": {
+              "type": "number",
+              "description": "שווי הוני (102 capital) zkifa."
+            },
+            "ordinaryIncomeValue": {
+              "type": "number",
+              "description": "שווי פירותי ordinary income zkifa."
+            }
+          }
+        },
+        "ytd": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Year-to-date cumulative figures when present on payslip.",
+          "properties": {
+            "grossCash": { "type": "number" },
+            "taxableGross": { "type": "number" },
+            "incomeTax": { "type": "number" },
+            "ni": { "type": "number" },
+            "healthTax": { "type": "number" },
+            "netPay": { "type": "number" },
+            "pensionEmployee": { "type": "number" }
+          }
+        },
+        "leave": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "vacationDays": { "type": "number" },
+            "vacationBalance": { "type": "number" },
+            "sickDays": { "type": "number" },
+            "sickBalance": { "type": "number" }
+          }
+        }
+      }
+    },
+    "PayslipFlag": {
+      "type": "string",
+      "enum": [
+        "negative_gross",
+        "equity_vesting",
+        "equity_espp",
+        "imputed_income_present",
+        "ni_adjustment",
+        "health_adjustment",
+        "tax_correction",
+        "reserve_duty",
+        "retroactive_payment",
+        "pension_present",
+        "keren_hishtalmut_present",
+        "tax_validation_mismatch",
+        "low_parse_confidence",
+        "unknown_line_items",
+        "scanned_pdf_rejected",
+        "multi_page_ytd"
+      ]
+    },
+    "ParseMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pageCount": { "type": "integer", "minimum": 1 },
+        "parsedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of parse (client clock)."
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "amountTolerance": {
+          "type": "number",
+          "default": 0.01,
+          "description": "Tolerance used when reconciling line sums to totals."
+        }
+      }
+    }
+  }
+}

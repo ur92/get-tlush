@@ -1,0 +1,36 @@
+{
+  "vendor": "hilan",
+  "version": "1.0.0",
+  "mappingStrategy": "code_first",
+  "codes": {
+    "001": { "category": "earnings.base_salary", "explanationKey": "explain.earnings.baseSalary" },
+    "002": { "category": "earnings.role_supplement", "explanationKey": "explain.earnings.roleSupplement" },
+    "100": { "category": "earnings.travel", "explanationKey": "explain.earnings.travel" },
+    "107": { "category": "equity.rsu_vesting", "explanationKey": "explain.equity.rsuVesting" },
+    "111": { "category": "equity.rsu_vesting", "explanationKey": "explain.equity.rsuVesting" },
+    "184": { "category": "earnings.other", "explanationKey": "explain.earnings.other" },
+    "202": { "category": "equity.capital_gain_value", "explanationKey": "explain.equity.capitalGainValue" },
+    "203": { "category": "equity.ordinary_income_value", "explanationKey": "explain.equity.ordinaryIncomeValue" },
+    "302": { "category": "equity.ordinary_income_value", "explanationKey": "explain.equity.ordinaryIncomeValue" },
+    "497": { "category": "earnings.other", "explanationKey": "explain.earnings.grossUp" },
+    "602": { "category": "deduction.advance", "explanationKey": "explain.deduction.advance" },
+    "607": { "category": "deduction.other", "explanationKey": "explain.deduction.meals" },
+    "701": { "category": "earnings.reserve_duty", "explanationKey": "explain.earnings.reserveDuty" },
+    "1160": { "category": "equity.espp_purchase", "explanationKey": "explain.equity.esppRate" },
+    "1660": { "category": "equity.espp_purchase", "explanationKey": "explain.equity.esppDeduction" },
+    "012": { "category": "deduction.pension_employee", "explanationKey": "explain.deduction.pension" },
+    "205": { "category": "deduction.keren_hishtalmut_employee", "explanationKey": "explain.deduction.kerenHishtalmut" },
+    "481": { "category": "imputed.other", "explanationKey": "explain.imputed.mobile" },
+    "581": { "category": "imputed.other", "explanationKey": "explain.imputed.healthInsurance" },
+    "681": { "category": "imputed.meals", "explanationKey": "explain.imputed.meals" },
+    "8941": { "category": "imputed.keren_hishtalmut", "explanationKey": "explain.imputed.kerenHishtalmut" },
+    "3514": { "category": "imputed.other", "explanationKey": "explain.imputed.severanceCap" },
+    "INCOME_TAX": { "category": "deduction.income_tax", "explanationKey": "explain.deduction.incomeTax" },
+    "NI": { "category": "deduction.national_insurance", "explanationKey": "explain.deduction.nationalInsurance" },
+    "HEALTH": { "category": "deduction.health_tax", "explanationKey": "explain.deduction.healthTax" }
+  },
+  "labelPatterns": [
+    { "patterns": ["שכר יסוד", "שכר בסיס"], "explanationKey": "explain.earnings.baseSalary" },
+    { "patterns": ["שווי רכב", "שווי שימוש ברכב"], "explanationKey": "explain.imputed.companyCar" }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "israeli-payroll-calculator": {
+      "source": "skills-il/accounting",
+      "sourceType": "github",
+      "computedHash": "be177f9cd4856a3861d1cba0f93bf4dd09a2c081117707a4198fd443904394f2"
+    }
+  }
+}

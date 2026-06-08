@@ -1,0 +1,33 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DynamoDBWrite",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem",
+        "dynamodb:ConditionCheckItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:*:ACCOUNT_ID:table/salary_observations",
+        "arn:aws:dynamodb:*:ACCOUNT_ID:table/salary_observations/index/*"
+      ]
+    },
+    {
+      "Sid": "KmsForContributorToken",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt",
+        "kms:GenerateMac"
+      ],
+      "Resource": "arn:aws:kms:*:ACCOUNT_ID:key/*",
+      "Condition": {
+        "ForAnyValue:StringLike": {
+          "kms:ResourceAliases": [
+            "alias/get-tlush-analytics"
+          ]
+        }
+      }
+    }
+  ]
+}

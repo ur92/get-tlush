@@ -1,0 +1,22 @@
+{
+  "name": "tlush",
+  "private": true,
+  "packageManager": "yarn@4.6.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "packages/parsers/*"
+  ],
+  "scripts": {
+    "spec:validate": "node scripts/spec-validate.mjs",
+    "test:contract": "vitest run --config vitest.config.ts tests/contract",
+    "test": "vitest run --config vitest.config.ts",
+    "build": "yarn workspaces foreach -Apt run build"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

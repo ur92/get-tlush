@@ -1,0 +1,132 @@
+{
+  "version": "1.0.0",
+  "vendor": "merkava",
+  "mappingStrategy": "label_first",
+  "labelPatterns": [
+    {
+      "patterns": ["משולב אופק חדש", "שכר אופק משולב", "אופק חדש משולב"],
+      "code": "DB-OFEX-COMBINED",
+      "category": "earnings.base_salary",
+      "labelKey": "lines.ofexCombined",
+      "explanationKey": "explain.earnings.ofexCombined"
+    },
+    {
+      "patterns": ["ש.נוספות אופק חדש", "שעות נוספות אופק"],
+      "code": "DB-OFEX-SUPP",
+      "category": "earnings.overtime",
+      "labelKey": "lines.ofexSupplement",
+      "explanationKey": "explain.earnings.ofexSupplement"
+    },
+    {
+      "patterns": ["חוק הת.כלכלית", "חוק התייעלות כלכלית", "תוספת חוק כלכלי"],
+      "code": "DB-ECON-LAW",
+      "category": "earnings.economic_adjustment",
+      "labelKey": "lines.economicLaw",
+      "explanationKey": "explain.earnings.economicAdjustment"
+    },
+    {
+      "patterns": ["תוספת ותק", "תוספת ותק בהוראה"],
+      "code": "DB-SENIORITY",
+      "category": "earnings.seniority",
+      "labelKey": "lines.teachingSeniority",
+      "explanationKey": "explain.earnings.seniority"
+    },
+    {
+      "patterns": ["תוספת מחנכת", "תוספת תפקיד", "מקדם משרה"],
+      "code": "DB-ROLE",
+      "category": "earnings.role_supplement",
+      "labelKey": "lines.roleSupplement",
+      "explanationKey": "explain.earnings.roleSupplement"
+    },
+    {
+      "patterns": ["שווי קה\"ש לצורך מס", "שווי קרן השתלמות למס", "שווי השתלמות"],
+      "code": "DB-KH-IMPUTED",
+      "category": "imputed.keren_hishtalmut",
+      "labelKey": "lines.kerenHishtalmutImputed",
+      "explanationKey": "explain.imputed.kerenHishtalmut",
+      "isImputed": true
+    },
+    {
+      "patterns": ["מס הכנסה"],
+      "code": "DB-INCOME-TAX",
+      "category": "deduction.income_tax",
+      "labelKey": "lines.incomeTax",
+      "explanationKey": "explain.deduction.incomeTax",
+      "sourceRegion": "summary"
+    },
+    {
+      "patterns": ["ביטוח לאומי", "ב.לאומי עובד"],
+      "code": "DB-NI",
+      "category": "deduction.national_insurance",
+      "labelKey": "lines.nationalInsurance",
+      "explanationKey": "explain.deduction.nationalInsurance",
+      "sourceRegion": "summary"
+    },
+    {
+      "patterns": ["דמי בריאות", "ביטוח בריאות עובד"],
+      "code": "DB-HEALTH",
+      "category": "deduction.health_tax",
+      "labelKey": "lines.healthTax",
+      "explanationKey": "explain.deduction.healthTax",
+      "sourceRegion": "summary"
+    },
+    {
+      "patterns": ["הפרשי ביטוח לאומי", "הפרש ב.לאומי"],
+      "code": "DB-NI-DIFF",
+      "category": "deduction.ni_adjustment",
+      "labelKey": "lines.niAdjustment",
+      "explanationKey": "explain.deduction.niAdjustment",
+      "isOneTime": true
+    },
+    {
+      "patterns": ["הפרשי ב. בריאות", "הפרשי בריאות", "הפרש ב.בריאות"],
+      "code": "DB-HEALTH-DIFF",
+      "category": "deduction.health_adjustment",
+      "labelKey": "lines.healthAdjustment",
+      "explanationKey": "explain.deduction.healthAdjustment",
+      "isOneTime": true
+    },
+    {
+      "patterns": ["הראל מנוף - פנסיה", "הראל מנוף פנסיה", "פנסיה הראל"],
+      "code": "DB-PENSION-HAREL",
+      "category": "deduction.pension_employee",
+      "labelKey": "lines.pensionHarel",
+      "explanationKey": "explain.deduction.pension",
+      "sourceRegion": "funds"
+    },
+    {
+      "patterns": ["ק.השת)הסת( בינ\"ל", "קרן השתלמות בינלאומית", "קה\"ש בינלאומית"],
+      "code": "DB-KH-INTL",
+      "category": "deduction.keren_hishtalmut_employee",
+      "labelKey": "lines.kerenHishtalmutIntl",
+      "explanationKey": "explain.deduction.kerenHishtalmut",
+      "sourceRegion": "funds"
+    },
+    {
+      "patterns": ["גל גמל", "קופת גמל גל"],
+      "code": "DB-GEMEL-GAL",
+      "category": "deduction.gemel",
+      "labelKey": "lines.gemelGal",
+      "explanationKey": "explain.deduction.gemel",
+      "sourceRegion": "funds"
+    },
+    {
+      "patterns": ["ניכוי ועד", "דמי ועד"],
+      "code": "DB-UNION",
+      "category": "deduction.union",
+      "labelKey": "lines.unionDues",
+      "explanationKey": "explain.deduction.union"
+    }
+  ],
+  "summaryLabels": {
+    "grossCash": ["סה\"כ תשלומים", "שכר ברוטו", "סך כל התשלומים"],
+    "netPay": ["נטו לתשלום", "נטו לחשבון", "סכום לתשלום"],
+    "taxableGross": ["שכר חייב במס", "ברוטו לצורך מס"],
+    "payslipId": ["מספר תלוש", "תלוש מס"]
+  },
+  "detectionAnchors": {
+    "payslipIdPattern": "DB-\\d+-\\d+",
+    "domains": ["edu.gov.il"],
+    "ofekTerms": ["אופק", "משולב אופק", "דרגה באופק", "ותק בהוראה"]
+  }
+}

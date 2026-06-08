@@ -1,0 +1,197 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ur92/get-tlush/schemas/anonymized-record.schema.json",
+  "title": "AnonymizedPayslipRecord",
+  "description": "Privacy-safe aggregate record for DynamoDB analytics ingest. No employee PII, no raw Hebrew labels, no PDF content.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recordId",
+    "recordedAt",
+    "appVersion",
+    "vendorId",
+    "period",
+    "totals",
+    "categoryCounts",
+    "flags"
+  ],
+  "properties": {
+    "recordId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique event id (UUID v4)."
+    },
+    "recordedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp of ingest."
+    },
+    "appVersion": {
+      "type": "string",
+      "description": "Web app semver at time of event.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"
+    },
+    "sessionHash": {
+      "type": "string",
+      "description": "Ephemeral salted hash of browser session — not linkable to identity without salt.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "userConsent": {
+      "type": "boolean",
+      "const": true,
+      "description": "Must be true; events without explicit opt-in are rejected at API."
+    },
+    "vendorId": {
+      "type": "string",
+      "enum": ["hilan", "merkava", "unknown"]
+    },
+    "parserVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.]+)?$"
+    },
+    "detectionConfidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["month", "year"],
+      "properties": {
+        "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "year": { "type": "integer", "minimum": 2000, "maximum": 2100 }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grossCash",
+        "taxableGross",
+        "netPay",
+        "incomeTax",
+        "ni",
+        "healthTax"
+      ],
+      "properties": {
+        "grossCash": { "type": "number" },
+        "taxableGross": { "type": "number" },
+        "netPay": { "type": "number" },
+        "incomeTax": { "type": "number" },
+        "ni": { "type": "number" },
+        "healthTax": { "type": "number" },
+        "pensionEmployee": { "type": "number" },
+        "imputedIncomeTotal": {
+          "type": "number",
+          "description": "Sum of imputed line amounts only."
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "creditPoints": { "type": "number", "minimum": 0 },
+        "hasEquity": { "type": "boolean" },
+        "hasYtd": { "type": "boolean" }
+      }
+    },
+    "categoryCounts": {
+      "type": "object",
+      "description": "Histogram of line-item categories — keys are LineItemCategory enum values.",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "propertyNames": {
+        "enum": [
+          "earnings.base_salary",
+          "earnings.travel",
+          "earnings.bonus",
+          "earnings.overtime",
+          "earnings.seniority",
+          "earnings.role_supplement",
+          "earnings.economic_adjustment",
+          "earnings.reserve_duty",
+          "earnings.other",
+          "imputed.company_car",
+          "imputed.keren_hishtalmut",
+          "imputed.meals",
+          "imputed.other",
+          "equity.rsu_vesting",
+          "equity.espp_purchase",
+          "equity.capital_gain_value",
+          "equity.ordinary_income_value",
+          "equity.other",
+          "deduction.income_tax",
+          "deduction.national_insurance",
+          "deduction.health_tax",
+          "deduction.pension_employee",
+          "deduction.pension_employer",
+          "deduction.keren_hishtalmut_employee",
+          "deduction.keren_hishtalmut_employer",
+          "deduction.gemel",
+          "deduction.union",
+          "deduction.loan",
+          "deduction.advance",
+          "deduction.garnishment",
+          "deduction.correction",
+          "deduction.ni_adjustment",
+          "deduction.health_adjustment",
+          "deduction.other",
+          "unknown"
+        ]
+      }
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "negative_gross",
+          "equity_vesting",
+          "equity_espp",
+          "imputed_income_present",
+          "ni_adjustment",
+          "health_adjustment",
+          "tax_correction",
+          "reserve_duty",
+          "retroactive_payment",
+          "pension_present",
+          "keren_hishtalmut_present",
+          "tax_validation_mismatch",
+          "low_parse_confidence",
+          "unknown_line_items",
+          "scanned_pdf_rejected",
+          "multi_page_ytd"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "parseQuality": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "earningsLineCount": { "type": "integer", "minimum": 0 },
+        "deductionsLineCount": { "type": "integer", "minimum": 0 },
+        "unknownLineCount": { "type": "integer", "minimum": 0 },
+        "lowConfidenceLineCount": { "type": "integer", "minimum": 0 },
+        "pageCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional calculator reconciliation summary — amounts only, no labels.",
+      "properties": {
+        "taxDelta": {
+          "type": "number",
+          "description": "Parsed income tax minus estimated (NIS)."
+        },
+        "niDelta": { "type": "number" },
+        "withinTolerance": { "type": "boolean" }
+      }
+    }
+  }
+}

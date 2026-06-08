@@ -1,0 +1,81 @@
+{
+  "login": {
+    "title": "הסבר תלוש השכר שלך",
+    "sign_in_google": "התחברות עם Google",
+    "terms_link": "תנאי שימוש ופרטיות",
+    "loading": "טוען..."
+  },
+  "upload": {
+    "title": "העלאת תלוש",
+    "privacy_notice": "הקובץ נשאר במכשיר שלך — לא מועלה לשרת",
+    "drop_zone": "גרור PDF או לחץ לבחירה",
+    "terms_checkbox": "אני מסכים/ה לתנאי השימוש",
+    "terms_link": "תנאים",
+    "analyze": "נתח תלוש",
+    "parsing": "מנתח תלוש...",
+    "back": "חזרה",
+    "error": {
+      "wrong_type": "יש להעלות קובץ PDF בלבד",
+      "too_large": "הקובץ גדול מדי (מקסימום 10MB)",
+      "parse_fail": "לא הצלחנו לנתח את התלוש. ודא שהקובץ הוא תלוש חילן או מרכבה.",
+      "scanned": "קובץ סרוק אינו נתמך — נדרש PDF עם שכבת טקסט"
+    }
+  },
+  "summary": {
+    "period_vendor": "תלוש: {{period}} · {{vendor}}",
+    "net_to_account": "נטו לחשבון",
+    "from_gross": "מברוטו {{amount}}",
+    "continue_breakdown": "המשך לפירוט"
+  },
+  "breakdown": {
+    "title": "פירוט תלוש",
+    "placeholder": "פירוט מפורט יתווסף בגרסה הבאה",
+    "tabs": {
+      "fixed_variable": "קבוע מול משתנה",
+      "taxes": "מיסים וזיכויים",
+      "pension": "פנסיה וקרן השתלמות",
+      "equity": "מניות ואופציות"
+    },
+    "columns": {
+      "description": "תיאור",
+      "amount": "סכום",
+      "explanation": "הסבר"
+    }
+  },
+  "waterfall": {
+    "gross_cash": "ברוטו מזומן",
+    "income_tax": "מס הכנסה",
+    "ni": "ביטוח לאומי",
+    "health_tax": "מס בריאות",
+    "pension_employee": "פנסיה (עובד)",
+    "net_pay": "נטו לתשלום"
+  },
+  "flags": {
+    "negative_gross": "שים לב: ברוטו שלילי — ייתכן תלוש תיקון",
+    "tax_mismatch": "שים לב: פער בין מס מחושב למס בתלוש",
+    "ni_adjustment": "הפרשי ביטוח לאומי בתלוש",
+    "equity_vesting": "קיימות שורות הקצאת מניות (RSU)",
+    "equity_espp": "קיימות שורות ESPP",
+    "unknown_line_items": "יש שורות שלא זוהו — בדוק מול מחלקת שכר"
+  },
+  "vendors": {
+    "hilan": "חילן",
+    "merkava": "מרכבה",
+    "unknown": "לא ידוע"
+  },
+  "disclaimer": {
+    "not_tax_advice": "השירות מספק הסבר והערכה בלבד — אינו ייעוץ מס. לשאלות מס פנו לרואה חשבון או יועץ מס."
+  },
+  "terms": {
+    "title": "תנאי שימוש ומדיניות פרטיות",
+    "back": "חזרה"
+  },
+  "common": {
+    "sign_out": "התנתקות",
+    "loading": "טוען...",
+    "config_error": "שגיאת תצורה: חסרים משתני סביבה נדרשים (VITE_GOOGLE_CLIENT_ID, VITE_OIDC_REDIRECT_URI)"
+  },
+  "items": {
+    "unknown": "שורה לא מזוהה — בדוק מול מחלקת שכר"
+  }
+}

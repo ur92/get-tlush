@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ur92/get-tlush/schemas/line-item.schema.json",
+  "title": "LineItem",
+  "description": "A single earnings or deductions row from a payslip, normalized to a canonical category.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "rawLabel", "amount", "category"],
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Vendor line code or synthetic key (e.g. '001', 'DB-SALARY', 'TOTAL-NET').",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "rawLabel": {
+      "type": "string",
+      "description": "Hebrew (or mixed) label as extracted from the PDF before i18n.",
+      "minLength": 1
+    },
+    "labelKey": {
+      "type": "string",
+      "description": "Optional i18n key for a canonical display label (e.g. 'lines.baseSalary').",
+      "pattern": "^[a-z][a-zA-Z0-9._]*$"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Amount in NIS. Negative for deductions or corrections."
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Units when present (hours, days, percent basis)."
+    },
+    "rate": {
+      "type": "number",
+      "description": "Per-unit rate when present."
+    },
+    "unit": {
+      "type": "string",
+      "enum": ["hours", "days", "percent", "units", "months", "other"],
+      "description": "Unit of quantity when applicable."
+    },
+    "category": {
+      "$ref": "#/definitions/LineItemCategory"
+    },
+    "explanationKey": {
+      "type": "string",
+      "description": "i18n template key for deterministic explanation. Required for known categories per explain spec.",
+      "pattern": "^[a-z][a-zA-Z0-9._]*$"
+    },
+    "isImputed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when amount is taxable imputed income, not cash received (shovi rechev, keren hishtalmut value, equity zkifa)."
+    },
+    "isOneTime": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for bonuses, retro corrections, reserve-duty deltas, or other non-recurring items."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"],
+      "default": "high",
+      "description": "Parser confidence in code/category mapping."
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based PDF page where the line was found."
+    },
+    "sourceRegion": {
+      "type": "string",
+      "enum": ["earnings", "deductions", "imputed", "funds", "summary", "ytd", "other"],
+      "description": "Table or section the line was extracted from."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Vendor-specific non-PII hints (coefficient, grade, fund name key).",
+      "additionalProperties": {
+        "type": ["string", "number", "boolean", "null"]
+      }
+    }
+  },
+  "definitions": {
+    "LineItemCategory": {
+      "type": "string",
+      "description": "Canonical classification for explanation and analytics bucketing.",
+      "enum": [
+        "earnings.base_salary",
+        "earnings.travel",
+        "earnings.bonus",
+        "earnings.overtime",
+        "earnings.seniority",
+        "earnings.role_supplement",
+        "earnings.economic_adjustment",
+        "earnings.reserve_duty",
+        "earnings.other",
+        "imputed.company_car",
+        "imputed.keren_hishtalmut",
+        "imputed.meals",
+        "imputed.other",
+        "equity.rsu_vesting",
+        "equity.espp_purchase",
+        "equity.capital_gain_value",
+        "equity.ordinary_income_value",
+        "equity.other",
+        "deduction.income_tax",
+        "deduction.national_insurance",
+        "deduction.health_tax",
+        "deduction.pension_employee",
+        "deduction.pension_employer",
+        "deduction.keren_hishtalmut_employee",
+        "deduction.keren_hishtalmut_employer",
+        "deduction.gemel",
+        "deduction.union",
+        "deduction.loan",
+        "deduction.advance",
+        "deduction.garnishment",
+        "deduction.correction",
+        "deduction.ni_adjustment",
+        "deduction.health_adjustment",
+        "deduction.other",
+        "unknown"
+      ]
+    }
+  }
+}

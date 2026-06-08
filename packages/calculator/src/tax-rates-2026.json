@@ -1,0 +1,218 @@
+{
+  "year": 2026,
+  "currency": "ILS",
+  "sources": [
+    "Amendment 288 (income tax brackets, retroactive 1.1.2026)",
+    "Amendment 252 (Bituach Leumi reduced tier, effective 1.1.2026)",
+    "Section 45a pension tax credit (zikui gemel)"
+  ],
+  "incomeTax": {
+    "brackets": [
+      { "ceiling": 7010, "rate": 0.10 },
+      { "ceiling": 10060, "rate": 0.14 },
+      { "ceiling": 19000, "rate": 0.20 },
+      { "ceiling": 25100, "rate": 0.31 },
+      { "ceiling": 46690, "rate": 0.35 },
+      { "ceiling": 60130, "rate": 0.47 },
+      { "ceiling": null, "rate": 0.50 }
+    ],
+    "creditPointValue": 242
+  },
+  "pensionCredit": {
+    "rate": 0.35,
+    "salaryCeiling": 9700,
+    "contributionRate": 0.07,
+    "maxQualifyingContribution": 679,
+    "maxMonthlyCredit": 237.65
+  },
+  "nationalInsurance": {
+    "reducedCeiling": 7703,
+    "fullCeiling": 51910,
+    "employee": {
+      "reducedNiRate": 0.0104,
+      "fullNiRate": 0.07,
+      "reducedHealthRate": 0.0323,
+      "fullHealthRate": 0.0517
+    },
+    "employer": {
+      "reducedNiRate": 0.0451,
+      "fullNiRate": 0.076
+    }
+  },
+  "pension": {
+    "employeeRate": 0.06,
+    "employerRate": 0.065,
+    "severanceRate": 0.06
+  },
+  "tolerance": 0.01,
+  "testVectors": [
+    {
+      "id": "standard-20k-male",
+      "description": "Standard employee, 20,000 NIS gross, male resident (2.25 credit points), with pension",
+      "input": {
+        "grossSalary": 20000,
+        "creditPoints": 2.25,
+        "hasPension": true,
+        "shoviRechev": 0,
+        "calcEmployer": false
+      },
+      "expected": {
+        "taxableGross": 20000,
+        "incomeTax": 2443.85,
+        "pensionCredit": 237.65,
+        "bituachLeumi": 940.9,
+        "healthTax": 884.56,
+        "pensionEmployee": 1200,
+        "netSalary": 14530.69
+      }
+    },
+    {
+      "id": "female-20k",
+      "description": "20,000 NIS gross, female resident (2.75 credit points), with pension",
+      "input": {
+        "grossSalary": 20000,
+        "creditPoints": 2.75,
+        "hasPension": true,
+        "shoviRechev": 0,
+        "calcEmployer": false
+      },
+      "expected": {
+        "taxableGross": 20000,
+        "incomeTax": 2322.85,
+        "pensionCredit": 237.65,
+        "bituachLeumi": 940.9,
+        "healthTax": 884.56,
+        "pensionEmployee": 1200,
+        "netSalary": 14651.69
+      }
+    },
+    {
+      "id": "employer-cost-15k",
+      "description": "15,000 NIS gross with employer cost breakdown",
+      "input": {
+        "grossSalary": 15000,
+        "creditPoints": 2.25,
+        "hasPension": true,
+        "shoviRechev": 0,
+        "calcEmployer": true
+      },
+      "expected": {
+        "taxableGross": 15000,
+        "incomeTax": 1333.85,
+        "pensionCredit": 237.65,
+        "bituachLeumi": 590.9,
+        "healthTax": 626.06,
+        "pensionEmployee": 900,
+        "netSalary": 11549.19,
+        "employerNi": 901.98,
+        "employerPension": 975,
+        "employerSeverance": 900,
+        "totalEmployerCost": 17776.98
+      }
+    },
+    {
+      "id": "shovi-rechev-22k-3500",
+      "description": "22,000 NIS cash + 3,500 NIS shovi rechev (company car), with employer cost — script --example",
+      "input": {
+        "grossSalary": 22000,
+        "creditPoints": 2.25,
+        "hasPension": true,
+        "shoviRechev": 3500,
+        "calcEmployer": true
+      },
+      "expected": {
+        "taxableGross": 25500,
+        "incomeTax": 4164.85,
+        "pensionCredit": 237.65,
+        "bituachLeumi": 1325.9,
+        "healthTax": 1168.91,
+        "pensionEmployee": 1320,
+        "netSalary": 14020.34,
+        "employerNi": 1699.98,
+        "employerPension": 1430,
+        "employerSeverance": 1320,
+        "totalEmployerCost": 26449.98
+      }
+    },
+    {
+      "id": "low-salary-8k",
+      "description": "8,000 NIS gross — pension credit below ceiling (7% × 8,000 = 560)",
+      "input": {
+        "grossSalary": 8000,
+        "creditPoints": 2.25,
+        "hasPension": true,
+        "shoviRechev": 0,
+        "calcEmployer": false
+      },
+      "expected": {
+        "taxableGross": 8000,
+        "incomeTax": 127.1,
+        "pensionCredit": 168,
+        "bituachLeumi": 100.9,
+        "healthTax": 264.16,
+        "pensionEmployee": 480,
+        "netSalary": 7027.84
+      }
+    },
+    {
+      "id": "pension-credit-ceiling-9700",
+      "description": "9,700 NIS gross — at pension credit salary ceiling; max qualifying = 7% × 9,700 = 679",
+      "input": {
+        "grossSalary": 9700,
+        "creditPoints": 2.25,
+        "hasPension": true,
+        "shoviRechev": 0,
+        "calcEmployer": false
+      },
+      "expected": {
+        "taxableGross": 9700,
+        "incomeTax": 329.4,
+        "pensionCredit": 203.7,
+        "bituachLeumi": 219.9,
+        "healthTax": 352.05,
+        "pensionEmployee": 582,
+        "netSalary": 8216.65
+      }
+    },
+    {
+      "id": "no-pension-20k",
+      "description": "20,000 NIS gross without pension deductions",
+      "input": {
+        "grossSalary": 20000,
+        "creditPoints": 2.25,
+        "hasPension": false,
+        "shoviRechev": 0,
+        "calcEmployer": false
+      },
+      "expected": {
+        "taxableGross": 20000,
+        "incomeTax": 2681.5,
+        "pensionCredit": 0,
+        "bituachLeumi": 940.9,
+        "healthTax": 884.56,
+        "pensionEmployee": 0,
+        "netSalary": 15493.04
+      }
+    },
+    {
+      "id": "ni-ceiling-60k",
+      "description": "60,000 NIS gross — NI/health capped at full ceiling (51,910)",
+      "input": {
+        "grossSalary": 60000,
+        "creditPoints": 2.25,
+        "hasPension": true,
+        "shoviRechev": 0,
+        "calcEmployer": false
+      },
+      "expected": {
+        "taxableGross": 60000,
+        "incomeTax": 17837.05,
+        "pensionCredit": 237.65,
+        "bituachLeumi": 3174.6,
+        "healthTax": 2534.31,
+        "pensionEmployee": 3600,
+        "netSalary": 32854.04
+      }
+    }
+  ]
+}
