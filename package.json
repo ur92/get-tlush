@@ -3,7 +3,6 @@
   "private": true,
   "packageManager": "yarn@4.6.0",
   "workspaces": [
-    "apps/*",
     "packages/*",
     "packages/parsers/*"
   ],

@@ -26,7 +26,7 @@ export AWS_REGION=il-central-1
 export BUCKET_NAME=get-tlush-web-YOUR-SUFFIX   # globally unique
 ./infra/setup/01-static-site.sh setup
 
-cd apps/web && yarn build
+cd packages/web && yarn build
 BUCKET_NAME=$BUCKET_NAME ./infra/setup/01-static-site.sh deploy
 DISTRIBUTION_ID=... ./infra/setup/01-static-site.sh invalidate
 ```

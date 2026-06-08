@@ -16,7 +16,7 @@ The registry does **not** parse PDF bytes, explain payslips, or call external AP
 | Input | Type | Required | Source |
 | ----- | ---- | -------- | ------ |
 | `doc` | `ExtractedPdf` | yes | `@tlush/pdf-extract` per [pdf-extract.SPEC.md](./pdf-extract.SPEC.md) |
-| Registered plugins | `PayslipParserPlugin[]` | yes | `apps/web/src/parsers/index.ts` explicit registration |
+| Registered plugins | `PayslipParserPlugin[]` | yes | `packages/web/src/parsers/index.ts` explicit registration |
 
 ## Outputs
 

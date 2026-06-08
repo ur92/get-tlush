@@ -47,29 +47,32 @@ Fixed architectural and product decisions for the payslip explainer. These are *
 | Decision | Rule |
 | -------- | ---- |
 | Package manager | **Yarn workspaces** (not pnpm/npm at root) |
-| App | `apps/web` — Vite + React + TypeScript |
-| Packages | `packages/pdf-extract`, `packages/parsers/*`, `packages/calculator`, `packages/explain`, `packages/knowledge` |
+| Layout | **All code under `packages/`** — no top-level `apps/` |
+| Web SPA | `packages/web` (`@tlush/web`) — Vite + React + TypeScript |
+| Libraries | `packages/pdf-extract`, `packages/parsers/*`, `packages/calculator`, `packages/explain`, `packages/knowledge`, `packages/auth`, `packages/analytics` |
+| Repo root (not packages) | `specs/`, `infra/`, `scripts/`, `tests/`, `.github/` |
 | Tests | Vitest; contract tests read `specs/plugins/*/manifest.json` |
 | CI | `spec:validate` → `test:contract` → `build` → deploy |
+| Agent rules | `.cursor/rules/spec-driven-design.mdc`, [AGENTS.md](../AGENTS.md) |
 
-## 6. Authentication (Optional — Post-MVP Features)
-
-| Decision | Rule |
-| -------- | ---- |
-| Provider | **Google OIDC direct** — no custom auth server in MVP |
-| Flow | Authorization Code with PKCE from static SPA where needed |
-| Scope | Auth is **optional**; core payslip explain flow works without login |
-| Tokens | Stored in memory or secure browser storage; never sent with PDF bytes |
-
-## 7. Analytics (Optional — Privacy-Preserving)
+## 6. Authentication
 
 | Decision | Rule |
 | -------- | ---- |
-| Store | **Amazon DynamoDB** for anonymized usage records |
-| Ingest shape | `anonymized-record.schema.json` only — no employee PII, no raw labels with names |
-| Opt-in | User must consent before any analytics event is sent |
-| Client | Aggregated events from browser after parse; PDF content never included |
-| Fields allowed | vendor id, period month/year, totals buckets, category histograms, flags, app version, session hash |
+| Provider | **Google OIDC direct** — no Cognito, no passwords |
+| Flow | Authorization Code + PKCE from static SPA |
+| Scope | `/app/*` routes **require** valid OIDC session per `specs/auth/SPEC.md` |
+| Tokens | Browser session via `react-oidc-context`; never sent with PDF bytes |
+
+## 7. Analytics (Privacy-Preserving)
+
+| Decision | Rule |
+| -------- | ---- |
+| Store | **Amazon DynamoDB** table `salary_observations` |
+| Client payload | `specs/schemas/anonymized-record.schema.json` only |
+| Consent | **Terms checkbox at upload** (default checked); parse blocked if unchecked; analytics sent only if terms accepted for that session |
+| Client | `packages/analytics/anonymize()` before any network call; PDF never included |
+| PII | Never employee name, ID, employer, raw labels, Google `sub`/email in payload |
 
 ## 8. Hosting & Cost
 
@@ -106,3 +109,4 @@ All UI surfaces include a non-binding disclaimer (i18n key `disclaimer.estimate`
 | Date | Change |
 | ---- | ------ |
 | 2026-06-08 | Initial constitution — Phase 0 foundation |
+| 2026-06-08 | packages-only layout; auth required for /app/*; terms-at-upload analytics; AGENTS.md + Cursor SDD rule |

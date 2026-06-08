@@ -1142,15 +1142,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@tlush/pdf-extract@workspace:packages/pdf-extract"
   dependencies:
-    "@tlush/parser-core": "workspace:*"
     pdfjs-dist: "npm:^5.2.133"
     typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
-"@tlush/web@workspace:apps/web":
+"@tlush/web@workspace:packages/web":
   version: 0.0.0-use.local
-  resolution: "@tlush/web@workspace:apps/web"
+  resolution: "@tlush/web@workspace:packages/web"
   dependencies:
     "@types/react": "npm:^19.1.2"
     "@types/react-dom": "npm:^19.1.2"

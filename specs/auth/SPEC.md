@@ -82,7 +82,7 @@ sequenceDiagram
 ## Protected route guard
 
 ```typescript
-// Pseudocode — apps/web/src/routes/ProtectedRoute.tsx
+// Pseudocode — packages/web/src/routes/ProtectedRoute.tsx
 function ProtectedRoute({ children }) {
   const auth = useAuth();
   if (auth.isLoading) return <Loading />;
@@ -130,5 +130,5 @@ Not MVP. When needed, choose one path and document in this spec:
 ## Implementation packages
 
 - `packages/auth/` — config, `AuthProvider` wrapper, `useAuth` hook
-- `apps/web/src/routes/` — `LoginPage`, `CallbackPage`, `ProtectedRoute`
+- `packages/web/src/routes/` — `LoginPage`, `CallbackPage`, `ProtectedRoute`
 - No `infra/cognito/` — Google OAuth client only

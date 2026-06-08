@@ -14,7 +14,7 @@ build/
 *.tsbuildinfo
 
 # Vite
-apps/web/dist/
+packages/web/dist/
 
 # Environment
 .env

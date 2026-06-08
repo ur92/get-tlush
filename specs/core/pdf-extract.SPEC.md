@@ -132,7 +132,7 @@ export class PasswordProtectedPdfError extends Error {}
 
 ## Dependencies
 
-- `pdfjs-dist` (bundled worker in `apps/web`)
+- `pdfjs-dist` (bundled worker in `packages/web`)
 - No dependency on parser packages
 
 ## Fixtures

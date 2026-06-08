@@ -1,0 +1,61 @@
+---
+description: Spec-driven design for tlush — specs are source of truth; change order and validation rules
+alwaysApply: true
+---
+
+# Spec-Driven Design (tlush)
+
+Read [specs/constitution.md](specs/constitution.md) and [specs/README.md](specs/README.md) before changing behavior.
+
+## Source of truth
+
+| Layer | Location |
+| ----- | -------- |
+| Fixed decisions | `specs/constitution.md` |
+| Behavior | `specs/**/SPEC.md` |
+| Data contracts | `specs/schemas/*.schema.json` |
+| Golden data | `specs/plugins/*/fixtures/*.json` |
+| Vendor mapping | `specs/plugins/*/codes.json`, `manifest.json` |
+
+**When spec and code disagree, the spec wins.** Fix code or update spec + fixtures first, then implement.
+
+## Change order (required)
+
+1. `SPEC.md` and/or JSON schema
+2. `fixtures/*.json` or `manifest.json`
+3. Contract tests (`tests/contract/`)
+4. Implementation in `packages/`
+
+Never implement parser/UI/analytics behavior without a spec change when requirements change.
+
+## Validation before merge
+
+```bash
+yarn spec:validate    # ajv — fixtures must pass schemas
+yarn test:contract    # parsers, calculator, explain, analytics
+yarn test
+yarn build
+```
+
+CI blocks merge if any step fails.
+
+## Package layout
+
+- **Libraries**: `packages/*` (`@tlush/parser-hilan`, `@tlush/calculator`, …)
+- **Web SPA**: `packages/web` (`@tlush/web`) — deploy artifact
+- **Not in packages**: `specs/`, `infra/`, `scripts/`, `tests/` (repo-level)
+
+## Non-negotiables (constitution)
+
+- PDF stays client-side; never upload payslip bytes
+- No LLM at runtime for parse/explain
+- Hebrew RTL; user strings in `locales/he.json`
+- Analytics: anonymize before send; terms accepted at upload; no PII in ingest payload
+- Auth: Google OIDC direct; `/app/*` protected
+
+## New vendor checklist
+
+1. `specs/plugins/{vendor}/SPEC.md` + manifest + codes + fixtures
+2. `tests/contract/{vendor}.test.ts` or extend `parse.test.ts`
+3. `packages/parsers/{vendor}/`
+4. Register in `packages/web/src/parsers/index.ts`

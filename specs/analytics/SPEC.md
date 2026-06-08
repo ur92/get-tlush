@@ -52,35 +52,13 @@ Fields and patterns **never** sent to API or stored in DynamoDB. Stripped client
 
 ## AnonymizedRecord (client payload)
 
-```typescript
-interface AnonymizedRecord {
-  schema_version: number;          // e.g. 1
-  period: { year: number; month: number };
-  vendor: string;                  // hilan | merkava
-  metrics: {
-    gross_cash: number;
-    taxable_gross: number;
-    net_pay: number;
-    income_tax: number;
-    ni: number;
-    health_tax: number;
-    pension_employee?: number;
-    pension_employer?: number;
-    keren_hishtalmut_employee?: number;
-    keren_hishtalmut_employer?: number;
-    credit_points?: number;
-    has_equity: boolean;
-  };
-  details: Record<string, number | string | boolean>;
-  optional_context?: {
-    sector?: 'education' | 'tech' | 'public' | 'other';
-    seniority_band?: '0-2' | '3-5' | '6-10' | '10+';
-    role_family?: string;          // enum only — never free text
-  };
-}
-```
+**Contract:** [`specs/schemas/anonymized-record.schema.json`](../schemas/anonymized-record.schema.json) — implementation in `packages/analytics/src/anonymize.ts` must produce objects that pass ajv validation.
 
-`contributor_token` is **not** sent by client — Lambda derives it server-side.
+Required fields: `recordId`, `recordedAt`, `appVersion`, `vendorId`, `period`, `totals`, `categoryCounts`, `flags`, `userConsent: true`.
+
+Optional: `context`, `parseQuality`, `validation`, `details` (agile extension), `sessionHash`, `parserVersion`, `detectionConfidence`.
+
+`contributor_token` is **not** sent by client — Lambda derives it server-side when writing to DynamoDB.
 
 ## `details` map (agile extension)
 

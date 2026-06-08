@@ -25,9 +25,54 @@ function countLowConfidence(items: LineItem[]): number {
   return items.filter((item) => item.confidence === "low").length;
 }
 
+function bucketAmount(amount: number, step = 100): string {
+  const rounded = Math.round(amount / step) * step;
+  return `${rounded}-${rounded + step}`;
+}
+
+function buildDetails(payslip: CanonicalPayslip, allLines: LineItem[]): Record<string, number | string | boolean | string[]> {
+  const details: Record<string, number | string | boolean | string[]> = {};
+  const flags = payslip.flags;
+  const equityEvents: string[] = [];
+
+  if (flags.includes("equity_vesting")) {
+    equityEvents.push("vesting");
+    details.has_rsu_vesting = true;
+    const vestingTax = allLines
+      .filter((l) => l.category === "equity.rsu_vesting")
+      .reduce((s, l) => s + Math.abs(l.amount), 0);
+    if (vestingTax > 0) {
+      details.rsu_vesting_proceeds_bucket = bucketAmount(vestingTax);
+    }
+  }
+  if (flags.includes("equity_espp")) equityEvents.push("espp");
+  if (flags.includes("tax_correction")) equityEvents.push("correction");
+
+  const rsuSaleLines = allLines.filter((l) => l.category === "equity.capital_gain_value");
+  if (rsuSaleLines.length > 0) {
+    equityEvents.push("sale");
+    details.has_rsu_sale = true;
+    const proceeds = rsuSaleLines.reduce((s, l) => s + Math.abs(l.amount), 0);
+    details.rsu_sale_proceeds_bucket = bucketAmount(proceeds);
+  }
+
+  if (payslip.totals.pensionEmployee !== undefined) {
+    details.pension_employee = payslip.totals.pensionEmployee;
+  }
+  if (payslip.context.ytd?.incomeTax !== undefined) {
+    details.ytd_income_tax = payslip.context.ytd.incomeTax;
+  }
+  if (equityEvents.length > 0) {
+    details.equity_event_types = equityEvents;
+  }
+
+  return details;
+}
+
 export function anonymize(payslip: CanonicalPayslip): AnonymizedRecord {
   const allLines = [...payslip.earnings, ...payslip.deductions];
   const imputedIncomeTotal = sumImputed(allLines);
+  const details = buildDetails(payslip, allLines);
 
   const record: AnonymizedRecord = {
     recordId: crypto.randomUUID(),
@@ -69,6 +114,7 @@ export function anonymize(payslip: CanonicalPayslip): AnonymizedRecord {
       lowConfidenceLineCount: countLowConfidence(allLines),
       pageCount: payslip.parseMeta?.pageCount,
     },
+    ...(Object.keys(details).length > 0 ? { details } : {}),
   };
 
   assertNoPiiKeys(record as unknown as Record<string, unknown>);

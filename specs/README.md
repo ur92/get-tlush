@@ -142,6 +142,11 @@ yarn spec:validate    # ajv on schemas + fixtures + manifest.json
 yarn test:contract    # parser / explain / calculator contract tests
 ```
 
+## Agent & IDE rules
+
+- [AGENTS.md](../AGENTS.md) — entry point for coding agents
+- [.cursor/rules/spec-driven-design.mdc](../.cursor/rules/spec-driven-design.mdc) — Cursor rule (always apply)
+
 ## Related Documents
 
 - [constitution.md](./constitution.md) — fixed project decisions

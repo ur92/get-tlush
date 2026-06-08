@@ -192,6 +192,21 @@
         "niDelta": { "type": "number" },
         "withinTolerance": { "type": "boolean" }
       }
+    },
+    "details": {
+      "type": "object",
+      "description": "Agile observability extension — RSU sale tax buckets, YTD, category sums. No PII, no raw labels.",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "number" },
+          { "type": "string" },
+          { "type": "boolean" },
+          {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        ]
+      }
     }
   }
 }

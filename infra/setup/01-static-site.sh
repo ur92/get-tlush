@@ -35,7 +35,7 @@ block_public_access() {
 }
 
 deploy_dist() {
-  local dist_dir="${1:-apps/web/dist}"
+  local dist_dir="${1:-packages/web/dist}"
   if [[ ! -d "$dist_dir" ]]; then
     echo "Missing $dist_dir — run: yarn build" >&2
     exit 1
@@ -67,7 +67,7 @@ Usage: 01-static-site.sh <command>
 Commands:
   create-bucket          Create private S3 bucket
   block-public-access    Block all public access on bucket
-  deploy [dist-dir]      Sync apps/web/dist to S3 (default: apps/web/dist)
+  deploy [dist-dir]      Sync packages/web/dist to S3 (default: packages/web/dist)
   invalidate             CloudFront cache invalidation (needs DISTRIBUTION_ID)
   setup                  create-bucket + block-public-access
 
@@ -85,7 +85,7 @@ cmd="${1:-}"
 case "$cmd" in
   create-bucket) create_bucket ;;
   block-public-access) block_public_access ;;
-  deploy) deploy_dist "${2:-apps/web/dist}" ;;
+  deploy) deploy_dist "${2:-packages/web/dist}" ;;
   invalidate) invalidate_cloudfront ;;
   setup) create_bucket; block_public_access ;;
   ""|help|-h|--help) usage ;;
