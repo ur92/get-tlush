@@ -1,0 +1,1 @@
+# Intentionally empty — Netlify Dev uses this instead of dist/ so SPA redirects do not break Vite asset paths.

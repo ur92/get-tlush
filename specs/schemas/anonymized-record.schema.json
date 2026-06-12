@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/ur92/get-tlush/schemas/anonymized-record.schema.json",
   "title": "AnonymizedPayslipRecord",
-  "description": "Privacy-safe aggregate record for DynamoDB analytics ingest. No employee PII, no raw Hebrew labels, no PDF content.",
+  "description": "Privacy-safe aggregate record for Supabase analytics ingest. No employee PII, no raw Hebrew labels, no PDF content.",
   "type": "object",
   "additionalProperties": false,
   "required": [

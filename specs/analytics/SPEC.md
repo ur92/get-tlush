@@ -4,7 +4,11 @@ Opt-in anonymous salary observations for aggregate Israeli salary statistics. Se
 
 ## Purpose
 
-After successful payslip parse, send **anonymized metrics** to a concealed AWS ingest API — only if the user accepted Terms at upload. Never send PDF bytes, PII, or raw payslip labels.
+After successful payslip parse, send **anonymized metrics** to a concealed Netlify Function ingest API — only if the user accepted Terms at upload. Never send PDF bytes, PII, or raw payslip labels.
+
+**Production only (MVP):** ingest runs only when the SPA is served from `gettlush.netlify.app`. `next` branch deploys, PR previews, and localhost skip analytics unless `VITE_ANALYTICS_INGEST_URL` is set for local testing — avoids polluting Supabase with staging data.
+
+**Local dev bypass:** when `VITE_DEV_NO_AUTH=true` and Vite `DEV` is true (`specs/auth/SPEC.md`), analytics is always disabled — no ingest POST even if `VITE_ANALYTICS_INGEST_URL` is set.
 
 ## Principles (non-negotiable)
 
@@ -13,10 +17,10 @@ After successful payslip parse, send **anonymized metrics** to a concealed AWS i
 | Terms at upload | Checkbox on upload form — default **checked**; parse blocked if unchecked |
 | No raw PDF | PDF never leaves browser |
 | Anonymize before send | `packages/analytics/anonymize()` runs client-side |
-| No PII in DB | Deny-list enforced client + Lambda |
-| Concealed API | Non-guessable path; URL via `VITE_ANALYTICS_INGEST_URL` at build time only |
-| Encrypt everywhere | TLS 1.2+ in transit; DynamoDB SSE-KMS at rest |
-| No WAF (MVP) | API Gateway throttling + Lambda rate limits only |
+| No PII in DB | Deny-list enforced client + ingest handler |
+| Concealed API | Netlify Function `a` at `/.netlify/functions/a`; production URL hardcoded in client when hostname is `gettlush.netlify.app` |
+| Encrypt everywhere | TLS 1.2+ in transit; Supabase Postgres encryption at rest |
+| No WAF (MVP) | Netlify Function timeout + per-contributor dedup only |
 | Purpose limitation | Aggregated statistics only — documented in `specs/legal/TERMS.md` |
 
 ## Pipeline
@@ -35,7 +39,7 @@ Trigger: `submitObservation()` runs automatically after parse **only if** terms 
 
 ## PII deny-list
 
-Fields and patterns **never** sent to API or stored in DynamoDB. Stripped client-side; Lambda rejects if present.
+Fields and patterns **never** sent to API or stored in Postgres. Stripped client-side; ingest handler rejects if present.
 
 | Category | Denied fields / patterns |
 | -------- | ------------------------ |
@@ -58,7 +62,7 @@ Required fields: `recordId`, `recordedAt`, `appVersion`, `vendorId`, `period`, `
 
 Optional: `context`, `parseQuality`, `validation`, `details` (agile extension), `sessionHash`, `parserVersion`, `detectionConfidence`.
 
-`contributor_token` is **not** sent by client — Lambda derives it server-side when writing to DynamoDB.
+`contributor_token` is **not** sent by client — ingest handler derives it server-side when writing to Supabase.
 
 ## `details` map (agile extension)
 
@@ -118,37 +122,42 @@ Fixed `metrics` for indexed queries; evolving observability in `details`:
 
 Round or bucket sensitive amounts before send (e.g. nearest ₪100 for equity buckets). Exact core totals (`gross_cash`, `net_pay`) may remain precise for validation aggregates.
 
-## DynamoDB schema: `salary_observations`
+## Supabase schema: `salary_observations`
 
-| Attribute | Type | Key | Notes |
-| --------- | ---- | --- | ----- |
-| `pk` | S | HASH | `OBS#{year}#{month}` |
-| `sk` | S | RANGE | ULID — unique observation |
-| `vendor` | S | | GSI candidate |
-| `gross_cash` | N | | Core metric |
-| `taxable_gross` | N | | |
-| `net_pay` | N | | |
-| `income_tax` | N | | |
-| `ni` | N | | |
-| `health_tax` | N | | |
-| `pension_employee` | N | | Optional |
-| `keren_hishtalmut_employee` | N | | Optional |
-| `credit_points` | N | | Optional |
-| `has_equity` | BOOL | | |
-| `details` | M | | DynamoDB Map — includes RSU sale tax fields |
-| `optional_context` | M | | Enum bands only |
-| `contributor_token` | S | GSI | `HMAC(KMS_secret, sub)` — abuse prevention, not PII |
-| `ingested_at` | S | | ISO 8601 |
-| `ttl` | N | | Optional retention (e.g. 7 years) |
+Migration: [`infra/supabase/001_salary_observations.sql`](../../infra/supabase/001_salary_observations.sql)
 
-**Encryption at rest**: SSE-KMS with dedicated CMK (`alias/get-tlush-analytics`).
+| Column | Type | Notes |
+| ------ | ---- | ----- |
+| `record_id` | UUID | PK — client `recordId` |
+| `period_year` | INT | Partition key candidate |
+| `period_month` | INT | 1–12 |
+| `vendor_id` | TEXT | `hilan` \| `merkava` \| `unknown` |
+| `gross_cash` | NUMERIC | Core metric |
+| `taxable_gross` | NUMERIC | |
+| `net_pay` | NUMERIC | |
+| `income_tax` | NUMERIC | |
+| `ni` | NUMERIC | |
+| `health_tax` | NUMERIC | |
+| `pension_employee` | NUMERIC | Optional |
+| `has_equity` | BOOLEAN | From `context.hasEquity` |
+| `details` | JSONB | Agile extension map |
+| `optional_context` | JSONB | Enum bands only (`context`) |
+| `category_counts` | JSONB | Line-item category histogram |
+| `flags` | JSONB | Observation flags array |
+| `app_version` | TEXT | Client semver |
+| `recorded_at` | TIMESTAMPTZ | Client timestamp |
+| `contributor_token` | TEXT | `HMAC-SHA256(secret, sub)` — abuse prevention, not PII |
+| `core_hash` | TEXT | Dedup key over core totals |
+| `ingested_at` | TIMESTAMPTZ | Server write time |
 
-**GSI**: `contributor_token-index` (KEYS_ONLY) for rate-limit / dedup lookups.
+**Unique index:** `(contributor_token, period_year, period_month, core_hash)` — idempotency / duplicate rejection (409).
+
+**Encryption at rest:** Supabase managed Postgres encryption.
 
 ## Concealed ingest API
 
 ```
-POST https://{api-id}.execute-api.{region}.amazonaws.com/{stage}/{random-path-segment}
+POST https://gettlush.netlify.app/.netlify/functions/a
 Authorization: Bearer {Google id_token}
 Content-Type: application/json
 
@@ -157,46 +166,56 @@ Body: AnonymizedRecord
 
 | Control | Purpose |
 | ------- | ------- |
-| OIDC JWT validation | Lambda validates Google `id_token` |
-| Non-guessable path | Reduces drive-by scraping (additive, not sole defense) |
-| API Gateway throttling | Per-stage rate/burst limits |
-| Lambda rate limit | Per-`contributor_token` cap via conditional write |
+| OIDC JWT validation | Handler validates Google `id_token` via JWKS |
+| Fixed short function name | `a` — not linked in public UI; reduces casual discovery |
+| Function timeout | 10 s max (`netlify.toml`) |
+| Per-contributor dedup | Unique index on contributor + period + core hash |
 | Payload size cap | Reject bodies > 8 KB |
 | Schema validation | Against `anonymized-record.schema.json` |
-| PII deny-list scan | Lambda rejects forbidden keys |
-| Idempotency | Same contributor + period + core hash → upsert or reject |
+| PII deny-list scan | Handler rejects forbidden keys |
+| Idempotency | Same contributor + period + core hash → 409 Conflict |
 
-**Do not** document ingest URL in public README or source comments. Inject via `VITE_ANALYTICS_INGEST_URL` at CI build time.
+**Do not** document ingest URL in public README. Production client resolves ingest URL from hostname (`gettlush.netlify.app`); optional `VITE_ANALYTICS_INGEST_URL` env override for local ingest testing only.
 
 ### Contributor token (server-side)
 
 ```
-contributor_token = HMAC-SHA256(KMS_derived_secret, google_sub)
+contributor_token = HMAC-SHA256(CONTRIBUTOR_TOKEN_SECRET, google_sub)
 ```
 
 - `sub` and email discarded after token derivation
-- Token used only for dedup/rate-limit — not linkable to identity without KMS secret
+- Token used only for dedup/rate-limit — not linkable to identity without secret
 
-## AWS components (MVP)
+## MVP backend components
 
-| Service | Role |
-| ------- | ---- |
-| API Gateway HTTP API | TLS termination, throttling (**no WAF**) |
-| Lambda (Node 20) | JWT validate, schema validate, PII scan, DynamoDB write |
-| DynamoDB on-demand | `salary_observations` table |
-| KMS CMK | Table encryption + HMAC secret |
-| CloudWatch | Lambda errors only — **no payslip/metric content in logs** |
+| Component | Role |
+| --------- | ---- |
+| Netlify static CDN | SPA hosting (`packages/web/dist`) |
+| Netlify Function `a` | JWT validate, schema validate, PII scan, Supabase write |
+| Supabase Postgres | `salary_observations` table |
+| `packages/ingest` | Shared handler logic (tested via contract tests) |
+
+**Environment variables (production context only in Netlify UI):**
+
+| Variable | Purpose |
+| -------- | ------- |
+| `CONTRIBUTOR_TOKEN_SECRET` | HMAC key for contributor token |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side write access |
+| `GOOGLE_CLIENT_ID` | JWT audience validation |
 
 ## Acceptance criteria
 
 1. WHEN terms checkbox unchecked at upload THEN `submitObservation()` is never called.
 2. WHEN terms accepted AND parse succeeds THEN anonymized POST sent with Bearer `id_token`.
-3. WHEN payload contains any PII deny-list field THEN client stripper removes it; Lambda returns 400 if any remain.
+3. WHEN payload contains any PII deny-list field THEN client stripper removes it; handler returns 400 if any remain.
 4. WHEN RSU sale lines parsed THEN `details.has_rsu_sale`, `details.rsu_sale_tax_bucket`, `details.rsu_sale_proceeds_bucket` populated.
-5. WHEN ingest succeeds THEN DynamoDB item has `pk=OBS#{year}#{month}`, encrypted at rest with KMS.
-6. WHEN same user resubmits same period THEN idempotency rule applies (upsert or 409).
-7. WHEN ingest URL missing from env THEN client skips analytics silently (no throw).
-8. WHEN CloudWatch logs written THEN no raw request body or PII fields logged.
+5. WHEN ingest succeeds THEN Supabase row has `period_year`, `period_month`, `contributor_token`, encrypted at rest.
+6. WHEN same user resubmits same period with same core totals THEN handler returns 409.
+7. WHEN ingest URL unavailable (non-production host and no dev override) THEN client skips analytics silently (no throw).
+8. WHEN `VITE_DEV_NO_AUTH=true` and Vite `DEV` is true THEN client skips analytics silently even if `VITE_ANALYTICS_INGEST_URL` is set.
+9. WHEN handler logs errors THEN no raw request body or PII fields logged.
+10. WHEN `userConsent` is not `true` THEN handler returns 400.
 
 ## Contract tests
 
@@ -205,11 +224,18 @@ tests/contract/analytics.test.ts
   → anonymize(fixture Payslip) contains no deny-list keys
   → RSU sale fixture populates details.rsu_sale_tax_bucket
   → terms=false → submitObservation not invoked (mock fetch)
+
+tests/contract/ingest.test.ts
+  → valid record → 201
+  → PII field → 400
+  → bad JWT → 401
+  → duplicate contributor+period+hash → 409
+  → userConsent !== true → 400
 ```
 
 ## Future (Phase 6+)
 
 - k-anonymity thresholds before public dashboard
-- Scheduled rollups → S3/Parquet → Athena
+- Scheduled rollups → Parquet / analytics warehouse
 - Optional WAF if abuse appears
-- Field-level KMS envelope encryption on `details` if regulatory review requires
+- Analytics on staging with separate Supabase project if needed

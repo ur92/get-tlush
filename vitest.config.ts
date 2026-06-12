@@ -14,6 +14,8 @@ export default defineConfig({
       "@tlush/parser-core": join(ROOT, "packages/parsers/core/src/index.ts"),
       "@tlush/parser-hilan": join(ROOT, "packages/parsers/hilan/src/index.ts"),
       "@tlush/parser-merkava": join(ROOT, "packages/parsers/merkava/src/index.ts"),
+      "@tlush/ingest": join(ROOT, "packages/ingest/src/index.ts"),
+      "@tlush/analytics": join(ROOT, "packages/analytics/src/index.ts"),
     },
   },
   test: {

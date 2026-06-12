@@ -1,91 +1,131 @@
 # Infrastructure
 
-Deployment target: **AWS free tier** — static site (Phase 4), optional analytics backend (Phase 5).
+Deployment target: **Netlify** — static SPA + Functions (MVP). AWS scripts retained as **legacy** (account closed).
 
-Full plan: [composer.md § AWS Deployment](../composer.md#aws-deployment-free-tier) and the canonical project plan AWS Setup Guide (Phase A/B checklists, OIDC, ingest API).
+**Netlify project:** [gettlush](https://app.netlify.com/projects/gettlush/overview)
 
-## Before you start
+## Deploy model
 
-1. [AWS account](https://aws.amazon.com/) with MFA on root
-2. IAM admin user (not root) + access keys
-3. `brew install awscli` → `aws configure` (region: `il-central-1` recommended)
-4. Verify: `aws sts get-caller-identity`
+| Deploy type | Branch / trigger | URL |
+| ----------- | ---------------- | --- |
+| **Production** | `main` | `https://gettlush.netlify.app` |
+| **Integration** | `next` (branch deploy) | `https://next--gettlush.netlify.app` |
+| **PR preview** | PR to `main` or `next` | `https://deploy-preview-N--gettlush.netlify.app` |
 
-## Phase A — Static site (week 4)
+### Git workflow
 
-| Step | What | How |
-| ---- | ---- | --- |
-| A1 | Private S3 bucket | `BUCKET_NAME=... ./infra/setup/01-static-site.sh setup` |
-| A2 | CloudFront + OAC | **AWS Console** (easiest first time) — note `CLOUDFRONT_DOMAIN` + `DISTRIBUTION_ID` |
-| A3 | Test deploy | `yarn build` then `BUCKET_NAME=... ./infra/setup/01-static-site.sh deploy` |
-| A4 | Google OAuth | Add CloudFront URL + `http://localhost:5173` to authorized origins/redirects |
-| A5 | GitHub OIDC | Create role from `infra/iam/github-oidc-*.json` — see [GitHub secrets](#github-secrets) |
+1. **Day-to-day work:** push to `next` → Netlify branch deploy (non-metered).
+2. **Release:** PR `next` → `main` → deploy preview for review → merge → production.
 
-```bash
-export AWS_REGION=il-central-1
-export BUCKET_NAME=get-tlush-web-YOUR-SUFFIX   # globally unique
-./infra/setup/01-static-site.sh setup
+Branch deploys and deploy previews are **non-metered** on Netlify.
 
-cd packages/web && yarn build
-BUCKET_NAME=$BUCKET_NAME ./infra/setup/01-static-site.sh deploy
-DISTRIBUTION_ID=... ./infra/setup/01-static-site.sh invalidate
-```
-
-## Phase B — Analytics (week 5)
-
-Concealed ingest API → DynamoDB. No payslip/PII in logs. See [specs/analytics/SPEC.md](../specs/analytics/SPEC.md).
-
-```bash
-./infra/setup/02-analytics.sh setup-core
-# After apps/ingest exists:
-KMS_KEY_ID=... LAMBDA_ROLE_ARN=... ./infra/setup/02-analytics.sh deploy-lambda
-INGEST_PATH_SEGMENT=<random-32-chars> LAMBDA_FUNCTION_ARN=... ./infra/setup/02-analytics.sh create-api
-```
-
-| Component | Service |
-| --------- | ------- |
-| Encrypt at rest | KMS (`alias/get-tlush-analytics`) |
-| Storage | DynamoDB `salary_observations` |
-| Ingest | Lambda `get-tlush-ingest` |
-| API | API Gateway HTTP API (secret path, throttling — no WAF in MVP) |
-
-## IAM stubs (`infra/iam/`)
+## Netlify configuration
 
 | File | Purpose |
 | ---- | ------- |
-| `lambda-trust.json` | Lambda execution role trust |
-| `lambda-ingest-policy.json` | DynamoDB write + KMS for ingest Lambda |
-| `github-oidc-trust.json` | GitHub Actions OIDC assume-role (replace `ACCOUNT_ID`) |
-| `github-oidc-deploy-policy.json` | S3 sync + CloudFront invalidation (replace placeholders) |
+| [`netlify.toml`](../netlify.toml) | Build command, functions dir, SPA catch-all |
+| [`netlify/functions/a.ts`](../netlify/functions/a.ts) | Netlify Function adapter |
 
-**OIDC one-time setup:** IAM → Identity providers → Add GitHub → create role `github-actions-get-tlush` with trust + deploy policy.
+Build command (Netlify):
 
-## GitHub secrets
+```bash
+corepack enable && yarn install --immutable && yarn spec:validate && yarn build
+```
 
-| Secret | Phase | Value |
-| ------ | ----- | ----- |
-| `AWS_ROLE_ARN` | A | `arn:aws:iam::…:role/github-actions-get-tlush` |
-| `AWS_REGION` | A | `il-central-1` |
-| `S3_BUCKET` | A | Static bucket name |
-| `CLOUDFRONT_DISTRIBUTION_ID` | A | For cache invalidation |
-| `VITE_GOOGLE_CLIENT_ID` | A | Google OAuth client ID |
-| `VITE_OIDC_REDIRECT_URI` | A | `https://YOUR_CLOUDFRONT_DOMAIN/callback` |
-| `VITE_ANALYTICS_INGEST_URL` | B | Full ingest URL — **do not commit** |
+Publish directory: `packages/web/dist`
 
-## CI/CD workflows
+Production ingest URL: `https://gettlush.netlify.app/.netlify/functions/a`.
+
+### Netlify UI settings
+
+| Setting | Value |
+| ------- | ----- |
+| Git repo | `ur92/get-tlush` |
+| Production branch | `main` |
+| Branch deploys | **On** |
+| Deploy previews | **On** |
+
+### Environment variables (by deploy context)
+
+Set in Netlify dashboard per context — no build scripts generate env at deploy time.
+
+| Variable | Production (`main`) | Branch deploys (`next`) | Deploy previews |
+| -------- | ------------------- | ----------------------- | --------------- |
+| `VITE_GOOGLE_CLIENT_ID` | ✓ | ✓ | ✓ |
+| `VITE_OIDC_REDIRECT_URI` | `https://gettlush.netlify.app/callback` | `https://next--gettlush.netlify.app/callback` | omit |
+| `CONTRIBUTOR_TOKEN_SECRET` | ✓ | — | — |
+| `SUPABASE_URL` | ✓ | — | — |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✓ | — | — |
+| `GOOGLE_CLIENT_ID` | ✓ (Function JWT + token exchange) | — | — |
+| `GOOGLE_CLIENT_SECRET` | ✓ (token exchange only) | — | — |
+
+Analytics ingest is **production-only** for MVP — the client sends observations only on `gettlush.netlify.app` (hardcoded URL); branch deploys, previews, and localhost skip analytics silently.
+
+### Google OAuth origins
+
+Register in Google Cloud Console:
+
+| Field | Values |
+| ----- | ------ |
+| JavaScript origins | `https://gettlush.netlify.app`, `https://next--gettlush.netlify.app`, `http://localhost:5173` |
+| Redirect URIs | `…/callback` for each origin |
+
+## Supabase (analytics storage)
+
+1. Create Supabase project.
+2. Run migration: [`infra/supabase/001_salary_observations.sql`](supabase/001_salary_observations.sql)
+3. Set `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in Netlify **production** context only.
+
+See [specs/analytics/SPEC.md](../specs/analytics/SPEC.md) for schema and ingest contract.
+
+## CI (GitHub Actions)
 
 | Workflow | Trigger | Steps |
 | -------- | ------- | ----- |
-| `.github/workflows/ci.yml` | push/PR → `main` | `yarn install` → `spec:validate` → `test` → `build` |
-| `.github/workflows/deploy.yml` | push → `main` | build with Vite env → S3 sync → CloudFront invalidation |
+| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | push/PR → `main`, `next` | `spec:validate` → `test` → `build` |
 
-PRs are blocked when `spec:validate` or contract tests fail.
+No deploy in CI — Netlify Git integration handles deploys.
 
-## Stack summary
+## Local development
 
-| Component | Service | Cost (MVP) |
-| --------- | ------- | ---------- |
-| Hosting | S3 (private) + CloudFront OAC | ~$0 free tier |
-| CI/CD | GitHub Actions | Free |
-| Analytics | KMS + DynamoDB + Lambda + API GW | ~$1+/mo when enabled |
-| Backend (MVP app) | None | $0 |
+| Task | Command |
+| ---- | ------- |
+| **Full local (auth + functions)** | `npx netlify dev` → open **http://localhost:8888** |
+| Frontend only (no login) | `yarn workspace @tlush/web dev` → http://localhost:5173 |
+
+### Local auth bypass (development only)
+
+Set in **`packages/web/.env`** (gitignored):
+
+```bash
+VITE_DEV_NO_AUTH=true
+```
+
+When enabled **and** the app runs under Vite's dev server (`import.meta.env.DEV`), Google OIDC is skipped: `/app/*` routes are accessible without sign-in, and analytics ingest is disabled (no POST). Default is **off**. Production and branch deploy builds set `DEV=false` at compile time, so this flag cannot activate outside local dev even if set in Netlify env.
+
+Restart the dev server after changing `VITE_*` variables.
+
+Google login requires the Netlify Function `google-token` (client secret stays server-side).
+
+**Root `.env`** (for `netlify dev`, gitignored):
+
+| Variable | Purpose |
+| -------- | ------- |
+| `GOOGLE_CLIENT_ID` | Same as `VITE_GOOGLE_CLIENT_ID` |
+| `GOOGLE_CLIENT_SECRET` | Token exchange only — never in Vite env |
+
+**`packages/web/.env`:** set `VITE_OIDC_REDIRECT_URI=http://localhost:8888/callback` when using `netlify dev`.
+
+Add `http://localhost:8888` + `/callback` to Google OAuth client.
+
+## Legacy — AWS (closed account)
+
+The following scripts are **not used** for MVP deploy. Kept for reference only.
+
+| Path | Former purpose |
+| ---- | -------------- |
+| `infra/setup/01-static-site.sh` | S3 + CloudFront static site |
+| `infra/setup/02-analytics.sh` | Lambda + API Gateway + DynamoDB ingest |
+| `infra/iam/*.json` | IAM policies for Lambda / GitHub OIDC |
+
+Previous plan: [composer.md § AWS Deployment](../composer.md#aws-deployment-free-tier)

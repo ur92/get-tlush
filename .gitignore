@@ -39,3 +39,6 @@ coverage/
 
 # Local fixtures (real payslip PDFs stay out of repo)
 tests/fixtures/pdf/*.pdf
+
+# Local Netlify folder
+.netlify
