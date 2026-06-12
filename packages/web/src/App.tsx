@@ -1,5 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { OidcProvider, validateOidcEnv } from "@tlush/auth";
+import {
+  getDevBypassOidcEnv,
+  isDevNoAuthEnabled,
+  OidcProvider,
+  validateOidcEnv,
+} from "@tlush/auth";
 import { UploadSessionProvider } from "./context/UploadSessionContext";
 import { BreakdownPage } from "./routes/BreakdownPage";
 import { CallbackPage } from "./routes/CallbackPage";
@@ -30,8 +35,13 @@ function getOidcEnv() {
   }
 }
 
+function HomeRedirect() {
+  return <Navigate to={isDevNoAuthEnabled() ? "/app/upload" : "/login"} replace />;
+}
+
 export default function App() {
-  const oidcEnv = getOidcEnv();
+  const devBypass = isDevNoAuthEnabled();
+  const oidcEnv = devBypass ? getDevBypassOidcEnv() : getOidcEnv();
 
   if (!oidcEnv) {
     return <ConfigError />;
@@ -42,7 +52,7 @@ export default function App() {
       <UploadSessionProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<HomeRedirect />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/callback" element={<CallbackPage />} />
             <Route path="/terms" element={<TermsPage />} />

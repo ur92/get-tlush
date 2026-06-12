@@ -1,7 +1,12 @@
 import { useAuth as useOidcAuth } from "react-oidc-context";
+import { getDevBypassAuthState, isDevNoAuthEnabled } from "./dev-bypass.js";
 
 export function useAuth() {
   const auth = useOidcAuth();
+
+  if (isDevNoAuthEnabled()) {
+    return getDevBypassAuthState();
+  }
 
   return {
     isLoading: auth.isLoading,

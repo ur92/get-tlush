@@ -24,6 +24,11 @@ export function LoginPage() {
       <div className="login-card">
         <div className="logo">tlush</div>
         <h1>{t("login.title")}</h1>
+        {auth.error ? (
+          <p className="login-error" role="alert">
+            {auth.error.message}
+          </p>
+        ) : null}
         <button
           type="button"
           className="btn btn-google"
