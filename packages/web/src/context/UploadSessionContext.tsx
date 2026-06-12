@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import type { CanonicalPayslip } from "@tlush/parser-core";
-import type { ExplanationResult } from "../lib/explain";
+import type { ExplanationResult } from "@tlush/explain";
 
 export type UploadSession = {
   termsAccepted: boolean;

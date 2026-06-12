@@ -76,6 +76,45 @@ describe("explain contract", () => {
     ).toBe(true);
   });
 
+  it("every payslip flag resolves to Hebrew text (no raw keys)", () => {
+    const ALL_FLAGS: string[] = [
+      "negative_gross",
+      "equity_vesting",
+      "equity_espp",
+      "imputed_income_present",
+      "ni_adjustment",
+      "health_adjustment",
+      "tax_correction",
+      "reserve_duty",
+      "retroactive_payment",
+      "pension_present",
+      "keren_hishtalmut_present",
+      "tax_validation_mismatch",
+      "low_parse_confidence",
+      "unknown_line_items",
+      "scanned_pdf_rejected",
+      "multi_page_ytd",
+    ];
+
+    const payslip = {
+      vendor: { id: "hilan", parserVersion: "test" },
+      period: { month: 4, year: 2026 },
+      earnings: [],
+      deductions: [],
+      totals: { grossCash: 0, taxableGross: 0, netPay: 0, incomeTax: 0, ni: 0, healthTax: 0 },
+      context: { creditPoints: 0 },
+      flags: ALL_FLAGS,
+    } as unknown as CanonicalPayslip;
+
+    const result = explainPayslip(payslip);
+    expect(result.flags).toHaveLength(ALL_FLAGS.length);
+
+    for (const f of result.flags) {
+      expect(heKeys.has(f.explanationKey), `missing Hebrew string for flag "${f.flag}" (key ${f.explanationKey})`).toBe(true);
+      expect(f.text, `flag "${f.flag}" renders raw key`).not.toBe(f.explanationKey);
+    }
+  });
+
   it("negative_gross flag produces banner explanation", () => {
     const payslip = loadFixture("specs/plugins/hilan/fixtures/may-2026.json");
     const result = explainPayslip(payslip);

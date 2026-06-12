@@ -8,7 +8,7 @@ export function SummaryPage() {
   const navigate = useNavigate();
   const { session } = useUploadSession();
 
-  if (!session.payslip) {
+  if (!session.payslip || !session.explanation) {
     return <Navigate to="/app/upload" replace />;
   }
 
@@ -16,14 +16,11 @@ export function SummaryPage() {
     <AppLayout>
       <PayslipSummary
         payslip={session.payslip}
+        explanation={session.explanation}
         onContinue={() => navigate("/app/breakdown")}
       />
-      {session.explanation?.flags.map((flag) => (
-        <FlagBanner
-          key={flag}
-          flag={flag}
-          severity={flag.includes("mismatch") || flag === "negative_gross" ? "warning" : "info"}
-        />
+      {session.explanation.flags.map((flag) => (
+        <FlagBanner key={flag.flag} flag={flag} />
       ))}
     </AppLayout>
   );

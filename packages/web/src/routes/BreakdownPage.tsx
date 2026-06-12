@@ -3,11 +3,14 @@ import { Link, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "../components/AppLayout";
 import { FlagBanner } from "../components/FlagBanner";
+import { LineItemList } from "../components/LineItemList";
 import { NetBreakdown } from "../components/NetBreakdown";
-import { SectionTable } from "../components/SectionTable";
+import {
+  filterLineItemsForTab,
+  hasEquityLineItems,
+  type TabId,
+} from "../lib/breakdown-tabs";
 import { useUploadSession } from "../context/UploadSessionContext";
-
-type TabId = "fixed_variable" | "taxes" | "pension" | "equity";
 
 export function BreakdownPage() {
   const { t } = useTranslation();
@@ -18,16 +21,23 @@ export function BreakdownPage() {
     return <Navigate to="/app/upload" replace />;
   }
 
+  const { explanation } = session;
+  const showEquity =
+    (session.payslip.context.equity?.hasEquity ?? false) ||
+    hasEquityLineItems(explanation.lineItems);
+
   const tabs: { id: TabId; key: string; visible: boolean }[] = [
     { id: "fixed_variable", key: "breakdown.tabs.fixed_variable", visible: true },
     { id: "taxes", key: "breakdown.tabs.taxes", visible: true },
     { id: "pension", key: "breakdown.tabs.pension", visible: true },
-    {
-      id: "equity",
-      key: "breakdown.tabs.equity",
-      visible: session.explanation.hasEquity,
-    },
+    { id: "equity", key: "breakdown.tabs.equity", visible: showEquity },
   ];
+
+  const { items, insights } = filterLineItemsForTab(
+    activeTab,
+    explanation.lineItems,
+    explanation.insights
+  );
 
   return (
     <AppLayout title={t("breakdown.title")}>
@@ -35,7 +45,7 @@ export function BreakdownPage() {
         ← {t("upload.back")}
       </Link>
 
-      <NetBreakdown steps={session.explanation.waterfall} />
+      <NetBreakdown steps={explanation.waterfall} />
 
       <div className="tabs" role="tablist">
         {tabs
@@ -54,10 +64,16 @@ export function BreakdownPage() {
           ))}
       </div>
 
-      <SectionTable rows={[]} />
+      <p className="tab-intro">{t(`breakdown.tab_intro.${activeTab}`)}</p>
 
-      {session.explanation.flags.map((flag) => (
-        <FlagBanner key={flag} flag={flag} />
+      <LineItemList
+        items={items}
+        insights={insights}
+        emptyMessage={t("breakdown.tab_empty")}
+      />
+
+      {explanation.flags.map((flag) => (
+        <FlagBanner key={flag.flag} flag={flag} />
       ))}
     </AppLayout>
   );

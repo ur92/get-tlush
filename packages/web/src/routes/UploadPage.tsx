@@ -8,9 +8,11 @@ import {
   UnrecognizedPayslipError,
 } from "@tlush/parser-core";
 import { useAuth } from "@tlush/auth";
+import { isDevNoAuthEnabled } from "@tlush/auth";
 import { AppLayout } from "../components/AppLayout";
 import { TermsCheckbox } from "../components/TermsCheckbox";
 import { useUploadSession } from "../context/UploadSessionContext";
+import { getAnalyticsIngestUrl } from "../lib/analytics-config";
 import { buildExplanation } from "../lib/explain";
 import { parserRegistry } from "../parsers";
 
@@ -64,7 +66,7 @@ export function UploadPage() {
         void submitObservation(payslip, {
           termsAccepted: true,
           idToken: auth.idToken,
-          ingestUrl: import.meta.env.VITE_ANALYTICS_INGEST_URL,
+          ingestUrl: getAnalyticsIngestUrl(),
         });
       }
 
@@ -88,7 +90,17 @@ export function UploadPage() {
 
   return (
     <AppLayout title={t("upload.title")}>
-      <p className="privacy-notice">{t("upload.privacy_notice")}</p>
+      {isDevNoAuthEnabled() ? (
+        <p className="dev-bypass-banner" role="status">
+          {t("dev.bypass_notice")}
+        </p>
+      ) : null}
+      <p className="page-intro">{t("upload.intro")}</p>
+
+      <div className="trust-banner">
+        <p className="trust-banner__title">{t("upload.trust_title")}</p>
+        <p className="trust-banner__body">{t("upload.trust_body")}</p>
+      </div>
 
       <div
         className="drop-zone"
@@ -104,7 +116,11 @@ export function UploadPage() {
           handleFile(e.dataTransfer.files[0] ?? null);
         }}
       >
-        {t("upload.drop_zone")}
+        <span className="drop-zone__icon" aria-hidden>
+          📄
+        </span>
+        <p>{t("upload.drop_zone")}</p>
+        <p className="drop-zone__hint">{t("upload.drop_hint")}</p>
         {file && <p className="file-name">{file.name}</p>}
       </div>
 
