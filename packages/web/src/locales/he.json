@@ -51,6 +51,45 @@
       "net": "לחשבון",
       "aria": "תרשים זרימה מהברוטו לנטו"
     },
+    "charts": {
+      "tax_donut": {
+        "title": "הרכב המיסים",
+        "total": "סה״כ מיסים",
+        "effective_rate": "שיעור אפקטיבי {{rate}}%",
+        "aria": "תרשים עוגה של מיסים: סה״כ {{total}}, שיעור אפקטיבי {{rate}}%"
+      },
+      "take_home": {
+        "title": "כמה נשאר ביד",
+        "pct_unit": "%",
+        "caption": "מתוך {{earned}} שהרווחת",
+        "aria": "מד כמה נשאר ביד: {{pct}}%, {{net}}"
+      },
+      "retirement": {
+        "title": "חיסכון לפנסיה",
+        "total": "סה״כ החודש: {{total}}",
+        "aria": "תרשים חיסכון לפנסיה, סה״כ {{total}}",
+        "groups": {
+          "pension": "פנסיה",
+          "keren": "קרן השתלמות"
+        },
+        "series": {
+          "employee": "עובד",
+          "employer": "מעסיק"
+        }
+      },
+      "leave": {
+        "title": "יתרות חופשה ומחלה",
+        "vacation": "חופשה",
+        "sick": "מחלה",
+        "days_accrued": "{{days}} ימים נצברו החודש",
+        "aria": "יתרות חופשה {{vacation}} ימים ומחלה {{sick}} ימים"
+      }
+    },
+    "insights": {
+      "title": "תובנות החודש",
+      "count": "{{count}} תובנות",
+      "empty": "אין תובנות מיוחדות לחודש זה"
+    },
     "result": "מה שנשאר לך ביד",
     "continue_breakdown": "רוצה לראות את כל הפרטים?"
   },

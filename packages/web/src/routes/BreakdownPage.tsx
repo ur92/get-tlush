@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "../components/AppLayout";
-import { FlagBanner } from "../components/FlagBanner";
 import { LineItemList } from "../components/LineItemList";
+import { MonthlyInsights } from "../components/MonthlyInsights";
 import { NetBreakdown } from "../components/NetBreakdown";
 import {
   filterLineItemsForTab,
@@ -72,9 +72,7 @@ export function BreakdownPage() {
         emptyMessage={t("breakdown.tab_empty")}
       />
 
-      {explanation.flags.map((flag) => (
-        <FlagBanner key={flag.flag} flag={flag} />
-      ))}
+      <MonthlyInsights flags={explanation.flags} />
     </AppLayout>
   );
 }

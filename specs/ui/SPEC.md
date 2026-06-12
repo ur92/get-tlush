@@ -136,6 +136,8 @@ Default post-login redirect: `/app/upload`.
 │                                     │
 │  [ flow diagram: gross → net + out ]│
 │                                     │
+│  [ infographics grid (conditional) ]│
+│                                     │
 │  בוא נראה מאיפה הגיע הסכום...       │
 │                                     │
 │  ▶ כמה הרווחת          ₪ 60,716    │
@@ -147,7 +149,7 @@ Default post-login redirect: `/app/upload`.
 │                                     │
 │  [ רוצה לראות את כל הפרטים? ]       │
 │                                     │
-│  ⚠️ [flags banners if any]          │
+│  ▶ תובנות החודש (collapsible)       │
 │                                     │
 │  disclaimer...                      │
 └─────────────────────────────────────┘
@@ -162,6 +164,7 @@ Default post-login redirect: `/app/upload`.
 | Period + vendor | `summary.period_vendor` | `PayslipSummary` |
 | Net hero | `summary.net_to_account` | `PayslipSummary` |
 | Flow diagram | `summary.flow.*`, `summary.group.*` | `PayslipFlow` |
+| Infographics grid | `summary.charts.*` | `InfographicsGrid` |
 | Story intro | `summary.intro` | `PayslipSummary` |
 | Expandable groups | `summary.you_earned`, `summary.group.*` | `ExplainCard` |
 | Group intros | `summary.explain.*` | `ExplainCard` |
@@ -169,7 +172,7 @@ Default post-login redirect: `/app/upload`.
 | Per-line prose | `AnnotatedLineItem.text` from `@tlush/knowledge` | `ExplainCard` details |
 | Result line | `summary.result` | `PayslipSummary` |
 | Full-details CTA | `summary.continue_breakdown` | navigates `/app/breakdown` |
-| Flag banners | `ExplanationResult.flags[].text` | `FlagBanner` |
+| Monthly insights | `summary.insights.*`, `ExplanationResult.flags[].text` | `MonthlyInsights` |
 
 **Flow diagram** (`PayslipFlow`, rendered with `@nivo/sankey`):
 
@@ -181,6 +184,23 @@ Default post-login redirect: `/app/upload`.
 - `role="img"` + `summary.flow.aria` on the wrapper; expandable `ExplainCard` groups below remain the accessible detail view for screen readers. Per-node amounts appear in the hover tooltip and in the cards below.
 - Responsive via `ResponsiveSankey`; the chart has a min-width and the wrapper allows horizontal scroll on very narrow viewports.
 
+**Infographics grid** (`InfographicsGrid`, after flow diagram):
+
+Pure data builders in `packages/web/src/lib/infographics.ts` derive chart datasets from `CanonicalPayslip.totals` and `context.leave`. Each chart renders only when its data is present (amount > 0 / field populated).
+
+| Chart | Library | Data builder | Condition |
+| ----- | ------- | ------------ | --------- |
+| Take-home gauge | SVG semicircle | `buildTakeHome` | net or earned > 0 |
+| Tax donut | `@nivo/pie` | `buildTaxComposition` | any tax slice > 0 |
+| Retirement savings | `@nivo/bar` | `buildRetirementSavings` | pension or keren > 0 |
+| Leave balance rings | SVG progress rings | `buildLeaveBalance` | vacation or sick balance present |
+
+Shared theming via `useChartTheme()` in `packages/web/src/lib/chart-theme.ts` (light/dark palettes + Nivo theme). Charts use `role="img"` + Hebrew `aria-label` from `summary.charts.*`; currency via `formatNis` (LTR numerals).
+
+**Monthly insights** (`MonthlyInsights`, before continue CTA):
+
+Collapsible notification panel titled `summary.insights.title` with count badge. Each `FlagExplanation` renders as a notification row (severity icon + accent + `text`). Default collapsed when more than 3 flags, expanded otherwise. Empty state uses `summary.insights.empty`.
+
 **Acceptance**:
 
 1. WHEN summary loads THEN net pay, earned amount, and grouped taxes/savings are shown without payroll jargon (no ברוטו/נטו/הכנסה חייבת in summary copy except the flow diagram gross label `summary.flow.gross`).
@@ -188,8 +208,10 @@ Default post-login redirect: `/app/upload`.
 3. WHEN earned ≤ 0 THEN the flow diagram renders nothing (no NaN / negative geometry).
 4. WHEN a group card is activated THEN detail rows expand with plain explanations from `AnnotatedLineItem.text` and the control is keyboard accessible (`aria-expanded`, Enter/Space toggle).
 5. WHEN remaining deductions after taxes and savings are zero THEN the "other" group card is hidden.
-6. WHEN flags present THEN banners render below the summary story.
-7. WHEN CTA clicked THEN navigate `/app/breakdown`.
+6. WHEN chart data present THEN infographics grid shows only applicable charts in a responsive 1-col (mobile) / 2-col layout.
+7. WHEN no chart data THEN infographics grid is omitted.
+8. WHEN flags present THEN monthly insights panel renders below the summary story (collapsible).
+9. WHEN CTA clicked THEN navigate `/app/breakdown`.
 
 ---
 
@@ -228,9 +250,9 @@ Equity tab MUST show separate rows for RSU vesting, sale proceeds, and sale tax 
 
 ### Flags section
 
-Persistent insight cards (same as summary) using `FlagExplanation.text` from explain engine.
+Persistent monthly insights panel (same component as summary) using `FlagExplanation.text` from explain engine.
 
-Component: `FlagBanner` (renders `.insight` card).
+Component: `MonthlyInsights` (collapsible notification rows).
 
 **Acceptance**:
 
@@ -256,10 +278,11 @@ Render content from `specs/legal/TERMS.md` (Hebrew). Accessible from login and u
 | `TermsCheckbox` | Upload — default checked |
 | `PayslipSummary` | Summary (hero + flow diagram + explainer cards) |
 | `PayslipFlow` | Summary — gross → net flow via `@nivo/sankey` |
+| `InfographicsGrid` | Summary — conditional chart tiles |
+| `MonthlyInsights` | Summary + Breakdown — collapsible flag notifications |
 | `ExplainCard` | Summary — expandable group accordion |
 | `NetBreakdown` | Waterfall |
 | `LineItemList` | Tab line items (card rows) |
-| `FlagBanner` | Flags / insights |
 | `ProtectedRoute` | Auth guard |
 | `ThemeToggle` | Theming — sun/moon toggle in header, login, and terms |
 | `PublicPageShell` | Login + Terms — sticky glass toolbar with theme toggle |
@@ -304,7 +327,7 @@ Payslip data flow, parsing, analytics, and auth behavior are unchanged by themin
 - Checkbox: associated `<label>`, keyboard toggle
 - Buttons: min 44×44px touch target
 - Theme toggle: `aria-label` from i18n (`common.theme_dark` / `common.theme_light`)
-- Flag banners: `role="alert"` for warnings
+- Flag notifications: `role="alert"` for warnings in `MonthlyInsights`
 - Waterfall and line items: explanation prose visible inline (no tooltip-only MVP)
 
 ## Acceptance criteria (summary)

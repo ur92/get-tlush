@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import type { CanonicalPayslip } from "@tlush/parser-core";
 import type { ExplanationResult } from "@tlush/explain";
 import { ExplainCard } from "./ExplainCard";
+import { InfographicsGrid } from "./InfographicsGrid";
+import { MonthlyInsights } from "./MonthlyInsights";
 import { PayslipFlow } from "./PayslipFlow";
 import { buildSimpleSummary, type SimpleGroupId } from "../lib/simple-groups";
 import { formatNis, formatPeriod } from "../lib/format";
@@ -59,6 +61,8 @@ export function PayslipSummary({ payslip, explanation, onContinue }: PayslipSumm
 
       <PayslipFlow summary={summary} />
 
+      <InfographicsGrid payslip={payslip} explanation={explanation} />
+
       <p className="summary-intro">{t("summary.intro")}</p>
 
       <div className="explain-card-list">
@@ -79,6 +83,8 @@ export function PayslipSummary({ payslip, explanation, onContinue }: PayslipSumm
         <span className="summary-result__label">{t("summary.result")}</span>
         <span className="summary-result__amount">{formatNis(summary.net)}</span>
       </div>
+
+      <MonthlyInsights flags={explanation.flags} />
 
       <button type="button" className="btn btn-primary" onClick={onContinue}>
         {t("summary.continue_breakdown")}

@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@nivo/bar": "^0.99.0",
     "@nivo/core": "^0.99.0",
+    "@nivo/pie": "^0.99.0",
     "@nivo/sankey": "^0.99.0",
     "i18next": "^26.3.1",
     "oidc-client-ts": "^3.5.0",

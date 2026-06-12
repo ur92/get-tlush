@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ResponsiveSankey } from "@nivo/sankey";
 import { formatNis } from "../lib/format";
-import { useTheme } from "../lib/theme";
+import { useChartTheme, type ToneKey } from "../lib/chart-theme";
 import type { SimpleProportions, SimpleSummary } from "../lib/simple-groups";
 
 type PayslipFlowProps = {
@@ -11,16 +11,6 @@ type PayslipFlowProps = {
 
 type FlowNode = { id: string; nodeLabel: string; amount: number };
 type FlowLink = { source: string; target: string; value: number; startColor?: string; endColor?: string };
-
-type ToneKey = "income" | "net" | "taxes" | "savings" | "other" | "gross";
-type Palette = Record<ToneKey, string>;
-
-const PALETTES: Record<"light" | "dark", Palette> = {
-  light: { income: "#16a34a", net: "#16a34a", taxes: "#6366f1", savings: "#0891b2", other: "#94a3b8", gross: "#16a34a" },
-  dark: { income: "#4ade80", net: "#4ade80", taxes: "#818cf8", savings: "#22d3ee", other: "#94a3b8", gross: "#4ade80" },
-};
-
-const LABEL_COLOR = { light: "#1d1d1f", dark: "#f5f5f7" } as const;
 
 const OUTFLOWS: ReadonlyArray<{ key: keyof SimpleProportions; id: string; labelKey: string; tone: ToneKey }> = [
   { key: "net", id: "out-net", labelKey: "summary.flow.net", tone: "net" },
@@ -37,8 +27,7 @@ function toneForNode(id: string): ToneKey {
 
 export function PayslipFlow({ summary }: PayslipFlowProps) {
   const { t } = useTranslation();
-  const { theme } = useTheme();
-  const palette = PALETTES[theme];
+  const { palette, labelColor, nivoTheme } = useChartTheme();
 
   const data = useMemo<{ nodes: FlowNode[]; links: FlowLink[] }>(() => {
     const earned = Math.max(0, summary.earned);
@@ -107,21 +96,9 @@ export function PayslipFlow({ summary }: PayslipFlowProps) {
           labelOrientation="horizontal"
           labelPadding={12}
           label={(node) => node.nodeLabel}
-          labelTextColor={LABEL_COLOR[theme]}
+          labelTextColor={labelColor}
           animate
-          theme={{
-            text: { fontFamily: "inherit", fontSize: 12 },
-            labels: { text: { fontFamily: "inherit", fontSize: 12, fontWeight: 600 } },
-            tooltip: {
-              container: {
-                background: "var(--color-surface)",
-                color: "var(--color-text)",
-                fontSize: 12,
-                borderRadius: 10,
-                boxShadow: "var(--shadow-card)",
-              },
-            },
-          }}
+          theme={nivoTheme}
           nodeTooltip={({ node }) => (
             <div className="payslip-flow__tooltip">
               <strong>{node.nodeLabel}</strong>
