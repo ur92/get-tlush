@@ -9,6 +9,8 @@ Hebrew RTL web interface for tlush. All user-facing strings in `locales/he.json`
 | Language | Hebrew (`lang="he"`, `dir="rtl"`) |
 | Layout | RTL — mirrors, right-aligned text, tab order logical for RTL |
 | Typography | Heebo web font (Hebrew-friendly); CSS design tokens in `packages/web/src/index.css` |
+| Theming | Light/dark via `data-theme` on `<html>`; system default + persisted toggle (`tlush-theme` in `localStorage`) |
+| Visual style | Apple-inspired layered gradient mesh, pronounced liquid-glass surfaces (`saturate` + heavy `blur`, specular highlights), sticky glass chrome |
 | Currency | `₪` suffix, `he-IL` number formatting |
 | i18n | No hardcoded Hebrew in components — `t('key')` only |
 | Auth | Protected `/app/*` per `specs/auth/SPEC.md` |
@@ -169,16 +171,15 @@ Default post-login redirect: `/app/upload`.
 | Full-details CTA | `summary.continue_breakdown` | navigates `/app/breakdown` |
 | Flag banners | `ExplanationResult.flags[].text` | `FlagBanner` |
 
-**Flow diagram** (`PayslipFlow` + `buildFlowLayout` in `packages/web/src/lib/flow-layout.ts`):
+**Flow diagram** (`PayslipFlow`, rendered with `@nivo/sankey`):
 
-- Custom inline SVG Sankey-style diagram — no chart library dependency.
-- RTL orientation: earnings source nodes on the **right**, gross trunk in the **center**, outflow nodes (net, taxes, savings, other) on the **left**.
-- Earnings `details` from the earnings group become one source node each (height ∝ amount); if none, a single source node uses `summary.earned`.
+- Sankey diagram rendered via the `@nivo/sankey` charting library (no hand-rolled layout math).
+- RTL orientation: earnings source nodes on the **right**, gross node in the **center**, outflow nodes (net, taxes, savings, other) on the **left**. Achieved by reversing link direction (outflow → gross → source), since the library always draws a link's source on the left.
+- Earnings `details` from the earnings group become one source node each (value ∝ amount, scaled so sources sum to `summary.earned`); if none, a single source node uses `summary.you_earned`.
 - Gross node value = `summary.earned`; outflow nodes use `summary.proportions` (net / taxes / savings / other), each omitted when amount ≤ 0.
-- Color mapping (CSS tokens): net → `--color-success`, taxes → `--color-tax`, savings → `--color-savings`, other → `--color-other`; source/gross → `--color-success` (inflow).
-- Links are filled ribbon paths (cubic-bezier) colored by destination tone at reduced opacity.
-- `role="img"` + `summary.flow.aria`; expandable `ExplainCard` groups below remain the accessible detail view for screen readers.
-- Responsive via SVG `viewBox`; wrapper allows horizontal scroll on very narrow viewports.
+- Color mapping is theme-aware (light/dark palettes matching the CSS tokens): net & source & gross → success/green, taxes → indigo, savings → cyan, other → slate. Node labels render **outside** the nodes to avoid overlap on small slices.
+- `role="img"` + `summary.flow.aria` on the wrapper; expandable `ExplainCard` groups below remain the accessible detail view for screen readers. Per-node amounts appear in the hover tooltip and in the cards below.
+- Responsive via `ResponsiveSankey`; the chart has a min-width and the wrapper allows horizontal scroll on very narrow viewports.
 
 **Acceptance**:
 
@@ -254,12 +255,14 @@ Render content from `specs/legal/TERMS.md` (Hebrew). Accessible from login and u
 | `UploadPage` | Upload + consent |
 | `TermsCheckbox` | Upload — default checked |
 | `PayslipSummary` | Summary (hero + flow diagram + explainer cards) |
-| `PayslipFlow` | Summary — gross → net Sankey-style SVG flow |
+| `PayslipFlow` | Summary — gross → net flow via `@nivo/sankey` |
 | `ExplainCard` | Summary — expandable group accordion |
 | `NetBreakdown` | Waterfall |
 | `LineItemList` | Tab line items (card rows) |
 | `FlagBanner` | Flags / insights |
 | `ProtectedRoute` | Auth guard |
+| `ThemeToggle` | Theming — sun/moon toggle in header, login, and terms |
+| `PublicPageShell` | Login + Terms — sticky glass toolbar with theme toggle |
 
 ## Disclaimer
 
@@ -278,10 +281,29 @@ interface UploadSession {
 
 No persistence across browser sessions in MVP.
 
+## Theming and visual design
+
+All styling is token-driven in `packages/web/src/index.css`. Brand/scale tokens (spacing, radii, typography) are theme-independent; semantic color and glass tokens are defined for light (`:root`) and dark (`:root[data-theme="dark"]`).
+
+| Mechanism | Implementation |
+| --------- | -------------- |
+| Theme attribute | `data-theme="light"` or `data-theme="dark"` on `<html>` |
+| Initial paint | Inline script in `index.html` sets `data-theme` before React mounts (no FOUC) |
+| Default | System `prefers-color-scheme` when no stored preference |
+| Persistence | `localStorage` key `tlush-theme`; explicit toggle overrides system |
+| System sync | When no stored preference, follows `prefers-color-scheme` changes |
+| Toggle UI | `ThemeToggle` in app header, login, and terms (`PublicPageShell`); i18n `common.theme_*` keys |
+| Glass surfaces | Liquid glass: `saturate()` + heavy `blur()` (40–48px), translucent fills, specular inset highlight, layered gradient mesh background. Sticky `.app-header`; frosted cards, tabs, drop zone, flow chart frame, disclaimer |
+| Fallbacks | Solid `--color-surface` when `backdrop-filter` unsupported or `prefers-reduced-transparency` |
+| Mobile chrome | `theme-color` meta tags and `color-scheme: light dark` in `index.html` |
+
+Payslip data flow, parsing, analytics, and auth behavior are unchanged by theming.
+
 ## Accessibility
 
 - Checkbox: associated `<label>`, keyboard toggle
 - Buttons: min 44×44px touch target
+- Theme toggle: `aria-label` from i18n (`common.theme_dark` / `common.theme_light`)
 - Flag banners: `role="alert"` for warnings
 - Waterfall and line items: explanation prose visible inline (no tooltip-only MVP)
 
@@ -298,6 +320,5 @@ No persistence across browser sessions in MVP.
 ## Non-goals (MVP UI)
 
 - English UI
-- Dark mode
 - Payslip history across sessions
 - Side-by-side PDF viewer

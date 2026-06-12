@@ -1,18 +1,18 @@
-import { useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@tlush/auth";
+import { PublicPageShell } from "../components/PublicPageShell";
 
 export function LoginPage() {
   const { t } = useTranslation();
   const auth = useAuth();
 
-  useEffect(() => {
-    if (auth.isAuthenticated) return;
-  }, [auth.isAuthenticated]);
-
   if (auth.isLoading) {
-    return <p className="loading">{t("login.loading")}</p>;
+    return (
+      <PublicPageShell>
+        <p className="loading public-loading">{t("login.loading")}</p>
+      </PublicPageShell>
+    );
   }
 
   if (auth.isAuthenticated) {
@@ -20,8 +20,8 @@ export function LoginPage() {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
+    <PublicPageShell>
+      <div className="login-card glass-surface card--elevated">
         <div className="logo">tlush</div>
         <h1>{t("login.title")}</h1>
         {auth.error ? (
@@ -39,10 +39,10 @@ export function LoginPage() {
           </span>
           {t("login.sign_in_google")}
         </button>
-        <p>
+        <p className="login-terms-link">
           <Link to="/terms">{t("login.terms_link")}</Link>
         </p>
       </div>
-    </div>
+    </PublicPageShell>
   );
 }
