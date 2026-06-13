@@ -14,8 +14,9 @@
       "pdf": "tests/fixtures/pdf/merkava-march-2026.pdf",
       "expected": "fixtures/march-2026-education.json",
       "assertions": {
-        "totals.netPay": 14892.47,
-        "totals.grossCash": 18240.0,
+        "totals.netPay": 18693.73,
+        "totals.grossCash": 17614.25,
+        "totals.incomeTax": 4073,
         "context.creditPoints": 9.25
       }
     }

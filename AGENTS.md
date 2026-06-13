@@ -13,6 +13,7 @@ yarn spec:validate
 yarn test:contract
 yarn test
 yarn build
+yarn fixture:from-pdf   # regenerate golden JSON from local PDF — see specs/README.md
 yarn workspace @tlush/web dev   # UI only (no Google login)
 npx netlify dev                 # auth + functions → http://localhost:8888
 ```

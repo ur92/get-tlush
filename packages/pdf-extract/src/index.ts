@@ -1,4 +1,6 @@
 export {
+  decodeGhostscriptCustomFont,
+  isGhostscriptPdf,
   normalizeDigits,
   parseNisAmount,
   reverseVisualHebrew,

@@ -1,5 +1,89 @@
 const HEBREW_RUN = /[\u0590-\u05FF\uFB1D-\uFB4F]+/g;
 
+/** David/Miriam Ghostscript subset: byte 0xA0..0xBA → Hebrew letters. */
+const GHOSTSCRIPT_HEBREW_ALPHABET = "אבגדהוזחטיכךלמםנןסעפףצץקרשת";
+
+const GHOSTSCRIPT_IPA_RANGE = /[\u02a0-\u02bf]/;
+const GHOSTSCRIPT_CTRL_DIGIT_RANGE = /[\u0011-\u001d]/;
+
+function decodeGhostscriptDigitChar(code: number): string {
+  if (code >= 0x14 && code <= 0x1d) {
+    return String.fromCharCode(0x30 + (code - 0x14));
+  }
+  if (code === 0x11) {
+    return "/";
+  }
+  if (code === 0x12) {
+    return ",";
+  }
+  if (code === 0x13) {
+    return ".";
+  }
+  if (code === 0x10) {
+    return "-";
+  }
+  return "";
+}
+
+function decodeGhostscriptHebrewChar(code: number): string {
+  if (code >= 0x02a0 && code <= 0x02bf) {
+    const byte = code - 0x0200;
+    const index = byte - 0xa0;
+    if (index >= 0 && index < GHOSTSCRIPT_HEBREW_ALPHABET.length) {
+      return GHOSTSCRIPT_HEBREW_ALPHABET[index] ?? "";
+    }
+  }
+  return "";
+}
+
+/**
+ * Ghostscript PDFs embed David/Miriam without ToUnicode; pdf.js yields IPA (U+02A0+)
+ * or control-char digits (U+0014..). Recover logical Hebrew and ASCII digits.
+ */
+export function decodeGhostscriptCustomFont(text: string, fontName?: string): string {
+  const usesDigitFont = fontName ? /_f[34]$/.test(fontName) : false;
+  const usesHebrewFont = fontName ? /_f[12]$/.test(fontName) : false;
+
+  if (
+    !usesDigitFont &&
+    !usesHebrewFont &&
+    !GHOSTSCRIPT_IPA_RANGE.test(text) &&
+    !GHOSTSCRIPT_CTRL_DIGIT_RANGE.test(text)
+  ) {
+    return text;
+  }
+
+  let out = "";
+  for (const char of text) {
+    const code = char.charCodeAt(0);
+    if (code >= 0x02a0 && code <= 0x02bf) {
+      out += decodeGhostscriptHebrewChar(code);
+      continue;
+    }
+    if (code >= 0x14 && code <= 0x1d) {
+      out += decodeGhostscriptDigitChar(code);
+      continue;
+    }
+    if (code === 0x11 || code === 0x12 || code === 0x13 || code === 0x10) {
+      out += decodeGhostscriptDigitChar(code);
+      continue;
+    }
+    if (code === 0 || code === 0x5) {
+      continue;
+    }
+    if (code > 0x1f && code < 0x7f) {
+      out += char;
+    }
+  }
+
+  return reverseVisualHebrew(out);
+}
+
+export function isGhostscriptPdf(metadata?: Record<string, unknown>): boolean {
+  const producer = metadata?.Producer;
+  return typeof producer === "string" && /ghostscript/i.test(producer);
+}
+
 const ARABIC_INDIC_DIGITS: Record<string, string> = {
   "\u0660": "0",
   "\u0661": "1",

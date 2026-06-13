@@ -16,6 +16,7 @@ Parse payslips produced by **Hilan** (חילן) payroll for Israeli employers �
 | ------ | ---------------- | ------ |
 | Vendor name | `/חילן\|Hilan/i` | 0.35 |
 | Layout anchor | `עובד ומעביד`, `פרוט התשלומים`, `תלוש שכר לחודש` | 0.25 |
+| Ghostscript layout | Ghostscript producer + `תלוש` + `לחודש` anchors | 0.35 |
 | Summary labels | `סך-כל התשלומים`, `נטו לתשלום`, `שכר נטו` | 0.20 |
 | Line codes | Numeric codes `001`, `002`, `100`, `107`, `111`, `1160`, `1660`, `202`, `203` in earnings/deductions tables | 0.20 |
 
@@ -27,6 +28,8 @@ Parse payslips produced by **Hilan** (חילן) payroll for Israeli employers �
 ### Encoding note
 
 Raw `pdf.js` / `pdftotext` extraction often returns Hebrew as **Windows-1255 bytes in visual (reversed) order**. Detection MUST run after `latin-1 → cp1255` recovery and per-token visual→logical reversal (see `specs/core/pdf-extract.SPEC.md`).
+
+**Ghostscript shiklolit layout:** Some Hilan exports use Ghostscript with David/Miriam custom fonts (`g_d0_f1`–`f4`). `@tlush/pdf-extract` decodes IPA/control-char glyphs before the Hilan parser runs. Statutory amounts may appear on separate label rows (not the standard four-column summary); parser falls back to label proximity and metadata `CreationDate` for period when month text is garbled.
 
 ## Parse Behavior
 
@@ -123,6 +126,7 @@ See `codes.json`. Unknown codes → `category: "unknown"`, include in output, se
 | -- | ----------------------- | ------------- | ----- |
 | `april-2026` | `tests/fixtures/pdf/hilan-april-2026.pdf` | `fixtures/april-2026.json` | FileDownload (8).pdf — net 26,730.51 |
 | `may-2026` | `tests/fixtures/pdf/hilan-may-2026.pdf` | `fixtures/may-2026.json` | FileDownload (7).pdf — negative net salary, equity zkifot |
+| `shiklolit-2024-06` | `tests/fixtures/pdf/hilan-shiklolit.pdf` | `fixtures/shiklolit-2024-06.json` | תלוש-משכורת-שיקלולית.pdf — Ghostscript shiklolit layout |
 
 ## Dependencies
 

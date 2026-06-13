@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "spec:validate": "node scripts/spec-validate.mjs",
+    "fixture:from-pdf": "node scripts/fixture-from-pdf.mjs",
     "test:contract": "vitest run --config vitest.config.ts tests/contract",
     "test": "vitest run --config vitest.config.ts",
     "build": "yarn workspaces foreach -Apt run build",

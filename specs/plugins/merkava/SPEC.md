@@ -35,7 +35,7 @@ Parse payslips from **Merkava** (מרכבה) — the Israeli public-sector payro
 
 ### Regions
 
-1. **Header** — payslip ID (`DB-*`), period, employee roles, hours, seniority (`ותק`), Ofek grade (`דרגה`).
+1. **Header** — payslip ID (`DB-*`), period (`MM/YYYY`, Hebrew month name + year e.g. `מרץ 2026`, or numeric month + year on the `תלוש משכורת לחודש` row), employee roles, hours, seniority (`ותק`), Ofek grade (`דרגה`).
 2. **Earnings** — label-driven lines: Ofek combined pay, supplements, economic-law adjustment.
 3. **Imputed** — `שווי קה"ש לצורך מס`, keren hishtalmut imputed value.
 4. **Statutory deductions** — income tax, Bituach Leumi, health tax; watch for **הפרשי** adjustment lines.
@@ -59,7 +59,7 @@ Parse payslips from **Merkava** (מרכבה) — the Israeli public-sector payro
 | Field | Typical source label |
 | ----- | -------------------- |
 | `totals.grossCash` | סה"כ תשלומים / שכר ברוטו |
-| `totals.netPay` | נטו לתשלום / נטו לחשבון |
+| `totals.netPay` | נטו לתשלום / נטו לחשבון / page-1 header summary (gross − deductions, label often absent) |
 | `totals.incomeTax` | מס הכנסה |
 | `totals.ni` | ביטוח לאומי |
 | `totals.healthTax` | דמי בריאות |

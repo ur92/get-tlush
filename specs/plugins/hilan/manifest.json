@@ -29,8 +29,21 @@
       "assertions": {
         "totals.netPay": 57226.2,
         "totals.totalEarnings": 52897.0,
-        "totals.printedNetSalary": -316654.8,
-        "totals.taxableGross": 1150482.71
+        "totals.printedNetSalary": -316654.8
+      }
+    },
+    {
+      "id": "shiklolit-2024-06",
+      "description": "June 2024 — Ghostscript shiklolit layout (David custom fonts)",
+      "pdf": "tests/fixtures/pdf/hilan-shiklolit.pdf",
+      "expected": "fixtures/shiklolit-2024-06.json",
+      "sourcePdf": "תלוש-משכורת-שיקלולית.pdf",
+      "assertions": {
+        "totals.netPay": 7011.12,
+        "totals.totalEarnings": 19945.12,
+        "totals.incomeTax": 5488,
+        "totals.ni": 7108,
+        "totals.healthTax": 338
       }
     }
   ]

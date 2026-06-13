@@ -1,3 +1,4 @@
+import { decodeGhostscriptCustomFont, isGhostscriptPdf } from "./hebrew.js";
 import { PasswordProtectedPdfError, PdfLoadError } from "./errors.js";
 import type { ExtractedPage, ExtractedPdf, ExtractOptions, PositionedToken } from "./types.js";
 
@@ -45,10 +46,15 @@ function isTextItem(item: unknown): item is PdfTextItem {
   return typeof item === "object" && item !== null && "str" in item;
 }
 
-function toPositionedToken(item: PdfTextItem): PositionedToken {
+function toPositionedToken(item: PdfTextItem, ghostscriptPdf: boolean): PositionedToken {
   const [, , , , x, y] = item.transform;
+  const text =
+    ghostscriptPdf || /_f[1234]$/.test(item.fontName ?? "")
+      ? decodeGhostscriptCustomFont(item.str, item.fontName)
+      : item.str;
+
   return {
-    text: item.str,
+    text,
     x,
     y,
     width: item.width,
@@ -104,6 +110,7 @@ export async function extractPdf(
     warnings.push("metadata_unavailable");
   }
 
+  const ghostscriptPdf = isGhostscriptPdf(metadata);
   const pages: ExtractedPage[] = [];
 
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
@@ -116,7 +123,7 @@ export async function extractPdf(
       if (!isTextItem(item) || item.str.length === 0) {
         continue;
       }
-      tokens.push(toPositionedToken(item));
+      tokens.push(toPositionedToken(item, ghostscriptPdf));
     }
 
     pages.push({

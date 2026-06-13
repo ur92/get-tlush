@@ -9,10 +9,13 @@ import { ParseError } from "@tlush/parser-core";
 import { parseNisAmount } from "@tlush/pdf-extract";
 import codes from "./codes.json" with { type: "json" };
 import {
-  amountFromRow,
+  amountsFromRow,
   buildRows,
+  findAmountByRowPattern,
   findAmountNearLabel,
+  findHeaderSummaryNetPay,
   findRowWithLabel,
+  HEBREW_MONTHS,
   rowText,
   type Row,
 } from "./utils.js";
@@ -31,7 +34,9 @@ type LabelPattern = {
 const LABEL_PATTERNS = codes.labelPatterns as LabelPattern[];
 
 function parsePeriod(rows: Row[]): { month: number; year: number; label: string } {
-  const periodRow = rows.find((row) => /תלוש משכורת לחודש|לחודש/.test(rowText(row)));
+  const periodRow =
+    rows.find((row) => /תלוש משכורת לחודש/.test(rowText(row))) ??
+    rows.find((row) => /לחודש/.test(rowText(row)));
   if (!periodRow) {
     throw new ParseError("Unable to locate Merkava payslip period");
   }
@@ -47,13 +52,16 @@ function parsePeriod(rows: Row[]): { month: number; year: number; label: string 
   }
 
   const yearMatch = text.match(/\b(20\d{2})\b/);
+  const year = yearMatch ? Number.parseInt(yearMatch[1], 10) : 0;
+  const monthName = Object.keys(HEBREW_MONTHS).find((name) => text.includes(name));
+  const monthFromName = monthName ? HEBREW_MONTHS[monthName] : 0;
   const monthMatch = text.match(/\b(0?[1-9]|1[0-2])\b/);
-  if (!yearMatch || !monthMatch) {
+  const month = monthFromName || (monthMatch ? Number.parseInt(monthMatch[1], 10) : 0);
+
+  if (!month || !year) {
     throw new ParseError("Unable to parse Merkava payslip period");
   }
 
-  const month = Number.parseInt(monthMatch[1], 10);
-  const year = Number.parseInt(yearMatch[1], 10);
   return {
     month,
     year,
@@ -159,19 +167,25 @@ export function parseMerkava(doc: ExtractedPdf): CanonicalPayslip {
       .filter((line) => !line.isImputed && line.category.startsWith("earnings."))
       .reduce((sum, line) => sum + line.amount, 0);
 
-  const netPay = findAmountNearLabel(rows, codes.summaryLabels.netPay);
+  const netPay =
+    findAmountNearLabel(rows, codes.summaryLabels.netPay) ??
+    findAmountByRowPattern(rows, /לתשלום\s*נטו|נטו\s*ל(?:תשלום|חשבון)|סכום\s*לתשלום/) ??
+    findHeaderSummaryNetPay(rows);
   const taxableGross =
     findAmountNearLabel(rows, codes.summaryLabels.taxableGross) ?? grossCash;
 
   const incomeTax =
+    findAmountNearLabel(rows, ["ניכוי מס הכנסה"]) ??
     deductions.find((line) => line.code === "DB-INCOME-TAX")?.amount ??
     findAmountNearLabel(rows, ["מס הכנסה"]) ??
     0;
   const ni =
+    findAmountNearLabel(rows, ['ניכוי ב"ל', "ניכוי ב.ל"]) ??
     deductions.find((line) => line.code === "DB-NI")?.amount ??
     findAmountNearLabel(rows, ["ביטוח לאומי"]) ??
     0;
   const healthTax =
+    findAmountNearLabel(rows, ["ניכוי מס בריאות"]) ??
     deductions.find((line) => line.code === "DB-HEALTH")?.amount ??
     findAmountNearLabel(rows, ["דמי בריאות", "ביטוח בריאות"]) ??
     0;
@@ -185,7 +199,11 @@ export function parseMerkava(doc: ExtractedPdf): CanonicalPayslip {
   const payslipId = payslipIdRow ? rowText(payslipIdRow).match(payslipIdPattern)?.[0] : undefined;
 
   const creditPointsRow = findRowWithLabel(rows, ["פרוט נקודות זיכוי", "נקודות זיכוי"]);
-  const creditPoints = creditPointsRow ? (amountFromRow(creditPointsRow) ?? 0) : 0;
+  const creditPoints = creditPointsRow
+    ? (amountsFromRow(creditPointsRow).find((value) => value >= 0 && value <= 20) ??
+      amountsFromRow(creditPointsRow).at(-1) ??
+      0)
+    : 0;
 
   return {
     vendor: {

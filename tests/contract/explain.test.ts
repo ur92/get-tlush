@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { explainPayslip, resolveExplanationKey } from "../../packages/explain/src/index.ts";
 import { getNestedString, locales } from "../../packages/knowledge/src/index.ts";
 import type { CanonicalPayslip } from "../../packages/explain/src/types.ts";
+import { loadPluginManifests } from "./load-manifests.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -29,24 +30,25 @@ function collectKeys(obj: Record<string, unknown>, prefix = ""): string[] {
 const heKeys = new Set(collectKeys(locales.he as Record<string, unknown>));
 
 describe("explain contract", () => {
-  const fixtures = [
-    "specs/plugins/hilan/fixtures/april-2026.json",
-    "specs/plugins/hilan/fixtures/may-2026.json",
-    "specs/plugins/merkava/fixtures/march-2026-education.json",
-  ];
+  it("every manifest fixture has classified lines with Hebrew explanations", async () => {
+    const manifests = await loadPluginManifests();
 
-  it.each(fixtures)("every classified line in %s has explanationKey", (fixturePath) => {
-    const payslip = loadFixture(fixturePath);
-    const result = explainPayslip(payslip);
+    for (const { plugin, manifest } of manifests) {
+      for (const fixture of manifest.fixtures) {
+        const fixturePath = join("specs/plugins", plugin, fixture.expected);
+        const payslip = loadFixture(fixturePath);
+        const result = explainPayslip(payslip);
 
-    for (const item of result.lineItems) {
-      if (item.category === "unknown") {
-        expect(item.explanationKey).toBe("explain.unknown");
-        continue;
+        for (const item of result.lineItems) {
+          if (item.category === "unknown") {
+            expect(item.explanationKey).toBe("explain.unknown");
+            continue;
+          }
+          expect(item.explanationKey).toBeTruthy();
+          expect(item.text).toBeTruthy();
+          expect(heKeys.has(item.explanationKey)).toBe(true);
+        }
       }
-      expect(item.explanationKey).toBeTruthy();
-      expect(item.text).toBeTruthy();
-      expect(heKeys.has(item.explanationKey)).toBe(true);
     }
   });
 
@@ -61,7 +63,7 @@ describe("explain contract", () => {
   });
 
   it("waterfall includes imputed step when imputed income present", () => {
-    const payslip = loadFixture("specs/plugins/hilan/fixtures/april-2026.json");
+    const payslip = loadFixture("specs/plugins/hilan/fixtures/may-2026.json");
     const result = explainPayslip(payslip);
 
     expect(result.waterfall.some((s) => s.explanationKey === "waterfall.imputed_income")).toBe(
