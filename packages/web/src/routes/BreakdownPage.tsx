@@ -14,8 +14,16 @@ import { useUploadSession } from "../context/UploadSessionContext";
 
 export function BreakdownPage() {
   const { t } = useTranslation();
-  const { session } = useUploadSession();
+  const { session, devBootstrapPending } = useUploadSession();
   const [activeTab, setActiveTab] = useState<TabId>("fixed_variable");
+
+  if (devBootstrapPending) {
+    return (
+      <AppLayout title={t("breakdown.title")}>
+        <p className="loading">{t("common.loading")}</p>
+      </AppLayout>
+    );
+  }
 
   if (!session.payslip || !session.explanation) {
     return <Navigate to="/app/upload" replace />;

@@ -40,5 +40,8 @@ coverage/
 # Local fixtures (real payslip PDFs stay out of repo)
 tests/fixtures/pdf/*.pdf
 
+# Copied from pdfjs-dist on predev/prebuild (packages/web/package.json)
+packages/web/public/pdf.worker.min.mjs
+
 # Local Netlify folder
 .netlify

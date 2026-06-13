@@ -12,10 +12,8 @@ async function loadPdfJs() {
 
   const pdfjs = await import("pdfjs-dist");
   if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-      "pdfjs-dist/build/pdf.worker.min.mjs",
-      import.meta.url
-    ).toString();
+    // Same-origin worker for Vite dev; avoid `@fs/` paths (blocked in Cursor/Glass browser).
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
   }
   return pdfjs;
 }

@@ -101,7 +101,7 @@ Set in **`packages/web/.env`** (gitignored):
 VITE_DEV_NO_AUTH=true
 ```
 
-When enabled **and** the app runs under Vite's dev server (`import.meta.env.DEV`), Google OIDC is skipped: `/app/*` routes are accessible without sign-in, and analytics ingest is disabled (no POST). Default is **off**. Production and branch deploy builds set `DEV=false` at compile time, so this flag cannot activate outside local dev even if set in Netlify env.
+When enabled **and** the app runs under Vite's dev server (`import.meta.env.DEV`), Google OIDC is skipped: `/app/*` routes are accessible without sign-in, analytics ingest is disabled (no POST), and the bundled `public/qa-payslip.pdf` is parsed automatically so you land on the summary screen without uploading. Default is **off**. Production and branch deploy builds set `DEV=false` at compile time, so this flag cannot activate outside local dev even if set in Netlify env.
 
 Restart the dev server after changing `VITE_*` variables.
 

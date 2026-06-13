@@ -142,6 +142,7 @@
     "theme_light": "מעבר למצב בהיר"
   },
   "dev": {
-    "bypass_notice": "מצב פיתוח מקומי — התחברות ואנליטיקה מושבתות."
+    "bypass_notice": "מצב פיתוח מקומי — התחברות ואנליטיקה מושבתות. נטען אוטומטית qa-payslip.pdf.",
+    "bootstrap_error": "טעינה אוטומטית של qa-payslip.pdf נכשלה: {{message}}"
   }
 }

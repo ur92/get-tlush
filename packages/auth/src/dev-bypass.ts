@@ -32,7 +32,7 @@ export function getDevBypassAuthState() {
     },
     error: undefined,
     signinRedirect: async () => {
-      window.location.assign("/app/upload");
+      window.location.assign("/app/summary");
     },
     signoutRedirect: async () => {
       window.location.assign("/login");

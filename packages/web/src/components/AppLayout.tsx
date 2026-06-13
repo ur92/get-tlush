@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@tlush/auth";
+import { useAuth, isDevNoAuthEnabled } from "@tlush/auth";
 import { Disclaimer } from "./Disclaimer";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -27,7 +27,14 @@ export function AppLayout({ children, title, showSignOut = true }: AppLayoutProp
           )}
         </div>
       </header>
-      <div className="app-content">{children}</div>
+      <div className="app-content">
+        {isDevNoAuthEnabled() ? (
+          <p className="dev-bypass-banner" role="status">
+            {t("dev.bypass_notice")}
+          </p>
+        ) : null}
+        {children}
+      </div>
       <Disclaimer />
     </div>
   );

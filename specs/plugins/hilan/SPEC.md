@@ -19,6 +19,7 @@ Parse payslips produced by **Hilan** (חילן) payroll for Israeli employers �
 | Ghostscript layout | Ghostscript producer + `תלוש` + `לחודש` anchors | 0.35 |
 | Summary labels | `סך-כל התשלומים`, `נטו לתשלום`, `שכר נטו` | 0.20 |
 | Line codes | Numeric codes `001`, `002`, `100`, `107`, `111`, `1160`, `1660`, `202`, `203` in earnings/deductions tables | 0.20 |
+| Synactis export | PDF metadata: `Author`/`Creator` Hilan, `Title` `Tlush`, `Producer` Synactis PDF In-The-Box | 0.10 |
 
 ### Thresholds
 

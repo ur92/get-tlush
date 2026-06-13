@@ -35,6 +35,8 @@ export function detectHilan(doc: ExtractedPdf): DetectionResult {
   const metadataAuthor = String(doc.metadata?.Author ?? "");
   const metadataCreator = String(doc.metadata?.Creator ?? "");
   const metadataSubject = String(doc.metadata?.Subject ?? "");
+  const metadataTitle = String(doc.metadata?.Title ?? "");
+  const metadataProducer = String(doc.metadata?.Producer ?? "");
   if (/Hilan/i.test(metadataAuthor) || /Hilan/i.test(metadataCreator)) {
     confidence += 0.35;
     signals.push("hilan_metadata");
@@ -42,6 +44,14 @@ export function detectHilan(doc: ExtractedPdf): DetectionResult {
   if (/Hilan/i.test(metadataAuthor) && /\d{2}\/\d{4}/.test(metadataSubject)) {
     confidence += 0.2;
     signals.push("hilan_subject_period");
+  }
+  if (
+    /Hilan/i.test(metadataAuthor) &&
+    /Tlush/i.test(metadataTitle) &&
+    /Synactis/i.test(metadataProducer)
+  ) {
+    confidence += 0.1;
+    signals.push("synactis_tlush_export");
   }
 
   if (

@@ -2,6 +2,7 @@ import { Link, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@tlush/auth";
 import { PublicPageShell } from "../components/PublicPageShell";
+import { getAppHomePath } from "../lib/dev-routes";
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -16,7 +17,7 @@ export function LoginPage() {
   }
 
   if (auth.isAuthenticated) {
-    return <Navigate to="/app/upload" replace />;
+    return <Navigate to={getAppHomePath()} replace />;
   }
 
   return (

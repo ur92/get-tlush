@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { submitObservation } from "@tlush/analytics";
-import { extractPdf, PdfLoadError } from "@tlush/pdf-extract";
+import { PdfLoadError } from "@tlush/pdf-extract";
 import {
   ScannedPdfError,
   UnrecognizedPayslipError,
@@ -12,9 +12,8 @@ import { isDevNoAuthEnabled } from "@tlush/auth";
 import { AppLayout } from "../components/AppLayout";
 import { TermsCheckbox } from "../components/TermsCheckbox";
 import { useUploadSession } from "../context/UploadSessionContext";
+import { analyzePayslip } from "../lib/analyze-payslip";
 import { getAnalyticsIngestUrl } from "../lib/analytics-config";
-import { buildExplanation } from "../lib/explain";
-import { parserRegistry } from "../parsers";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -22,13 +21,26 @@ export function UploadPage() {
   const { t } = useTranslation();
   const auth = useAuth();
   const navigate = useNavigate();
-  const { setSession } = useUploadSession();
+  const { session, setSession, devBootstrapPending, devBootstrapError } = useUploadSession();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [termsAccepted, setTermsAccepted] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [parsing, setParsing] = useState(false);
+
+  if (isDevNoAuthEnabled()) {
+    if (devBootstrapPending) {
+      return (
+        <AppLayout title={t("upload.title")}>
+          <p className="loading">{t("common.loading")}</p>
+        </AppLayout>
+      );
+    }
+    if (session.payslip && session.explanation) {
+      return <Navigate to="/app/summary" replace />;
+    }
+  }
 
   const handleFile = (selected: File | null) => {
     setError(null);
@@ -52,9 +64,7 @@ export function UploadPage() {
     setError(null);
 
     try {
-      const doc = await extractPdf(file);
-      const payslip = parserRegistry.parse(doc);
-      const explanation = buildExplanation(payslip);
+      const { payslip, explanation } = await analyzePayslip(file);
 
       setSession({
         termsAccepted,
@@ -90,11 +100,6 @@ export function UploadPage() {
 
   return (
     <AppLayout title={t("upload.title")}>
-      {isDevNoAuthEnabled() ? (
-        <p className="dev-bypass-banner" role="status">
-          {t("dev.bypass_notice")}
-        </p>
-      ) : null}
       <p className="page-intro">{t("upload.intro")}</p>
 
       <div className="trust-banner">
@@ -133,6 +138,12 @@ export function UploadPage() {
       />
 
       <TermsCheckbox checked={termsAccepted} onChange={setTermsAccepted} />
+
+      {devBootstrapError && (
+        <p className="error-message" role="alert">
+          {t("dev.bootstrap_error", { message: devBootstrapError })}
+        </p>
+      )}
 
       {error && <p className="error-message">{error}</p>}
 

@@ -6,6 +6,7 @@ import {
   validateOidcEnv,
 } from "@tlush/auth";
 import { UploadSessionProvider } from "./context/UploadSessionContext";
+import { getAppHomePath } from "./lib/dev-routes";
 import { BreakdownPage } from "./routes/BreakdownPage";
 import { CallbackPage } from "./routes/CallbackPage";
 import { LoginPage } from "./routes/LoginPage";
@@ -36,7 +37,7 @@ function getOidcEnv() {
 }
 
 function HomeRedirect() {
-  return <Navigate to={isDevNoAuthEnabled() ? "/app/upload" : "/login"} replace />;
+  return <Navigate to={isDevNoAuthEnabled() ? getAppHomePath() : "/login"} replace />;
 }
 
 export default function App() {
@@ -80,7 +81,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to={isDevNoAuthEnabled() ? getAppHomePath() : "/login"} replace />} />
           </Routes>
         </BrowserRouter>
       </UploadSessionProvider>

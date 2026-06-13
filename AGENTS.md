@@ -18,7 +18,7 @@ yarn workspace @tlush/web dev   # UI only (no Google login)
 npx netlify dev                 # auth + functions → http://localhost:8888
 ```
 
-**Local auth bypass:** set `VITE_DEV_NO_AUTH=true` in `packages/web/.env` and restart the dev server — skips Google login and analytics on localhost only. See [infra/README.md](infra/README.md).
+**Local auth bypass:** set `VITE_DEV_NO_AUTH=true` in `packages/web/.env` and restart the dev server — skips Google login and analytics on localhost only, and auto-loads `public/qa-payslip.pdf` straight to the summary screen. Open **`http://localhost:5173/`** (`yarn workspace @tlush/web dev`). Port **8888** needs `npx netlify dev` separately. See [infra/README.md](infra/README.md).
 
 ## Branch model & deploy URLs
 

@@ -62,7 +62,6 @@ export function TakeHomeGauge({ data }: TakeHomeGaugeProps) {
           className="take-home-gauge"
           viewBox={`0 0 ${SIZE} ${SIZE * 0.62}`}
           width="100%"
-          height="auto"
           aria-hidden="true"
         >
           <path
