@@ -17,7 +17,11 @@ export const HEBREW_MONTHS: Record<string, number> = {
 };
 
 export function decodeToken(text: string): string {
-  return reverseVisualHebrew(tryCp1255Decode(text.trim()));
+  const trimmed = text.trim();
+  if (/[\u0590-\u05FF]/.test(trimmed)) {
+    return trimmed;
+  }
+  return reverseVisualHebrew(tryCp1255Decode(trimmed));
 }
 
 export type RowToken = { text: string; x: number };
@@ -132,6 +136,68 @@ export function findLargestAmountByRowPattern(
   }
 
   return largest;
+}
+
+/** Hilan PDFs sometimes place summary totals on label-less numeric rows (Synactis export). */
+export function findHilanSummaryFallback(rows: Row[]): {
+  totalEarnings: number | null;
+  netPay: number | null;
+  totalDeductions: number | null;
+} {
+  const summaryBandRows = rows.filter((row) => row.y >= 680 && row.y <= 780);
+
+  const trailingMinusAmounts = summaryBandRows
+    .map((row) => {
+      const text = rowText(row).trim();
+      const amounts = amountsFromRow(row);
+      if (amounts.length !== 1 || !/^[\d,.\s]+-\s*$/.test(text)) {
+        return null;
+      }
+      return amounts[0];
+    })
+    .filter((value): value is number => value !== null);
+
+  const pureAmountRows = summaryBandRows
+    .map((row) => {
+      const text = rowText(row).trim();
+      const amounts = amountsFromRow(row);
+      if (amounts.length !== 1 || !/^[\d,.\s]+$/.test(text)) {
+        return null;
+      }
+      return amounts[0];
+    })
+    .filter((value): value is number => value !== null);
+
+  for (const totalCandidate of [...trailingMinusAmounts].sort((a, b) => b - a)) {
+    for (const netCandidate of [...pureAmountRows].sort((a, b) => b - a)) {
+      const diff = Number((totalCandidate - netCandidate).toFixed(2));
+      if (diff <= 0) {
+        continue;
+      }
+      const hasMatchingDeduction = rows.some((row) =>
+        amountsFromRow(row).some((amount) => Math.abs(amount - diff) <= 0.02)
+      );
+      if (hasMatchingDeduction) {
+        return {
+          totalEarnings: totalCandidate,
+          netPay: netCandidate,
+          totalDeductions: diff,
+        };
+      }
+    }
+  }
+
+  const netCandidates = pureAmountRows.filter((value) => value > 5000 && value < 500_000);
+  const earningsCandidates = trailingMinusAmounts.filter((value) => value > 1000);
+  if (netCandidates.length > 0 && earningsCandidates.length > 0) {
+    return {
+      totalEarnings: Math.min(...earningsCandidates),
+      netPay: Math.max(...netCandidates),
+      totalDeductions: null,
+    };
+  }
+
+  return { totalEarnings: null, netPay: null, totalDeductions: null };
 }
 
 export function amountsFromRow(row: Row): number[] {

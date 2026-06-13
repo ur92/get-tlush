@@ -10,7 +10,9 @@
       "@tlush/pdf-extract": ["../../packages/pdf-extract/src"],
       "@tlush/parser-core": ["../../packages/parsers/core/src"],
       "@tlush/parser-hilan": ["../../packages/parsers/hilan/src"],
-      "@tlush/parser-merkava": ["../../packages/parsers/merkava/src"]
+      "@tlush/parser-merkava": ["../../packages/parsers/merkava/src"],
+      "@tlush/explain": ["../../packages/explain/src"],
+      "@tlush/knowledge": ["../../packages/knowledge/src/browser"]
     }
   },
   "include": ["src", "vite.config.ts"]

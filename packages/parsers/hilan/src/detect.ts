@@ -6,7 +6,7 @@ const HILAN_CODE_PATTERN = /\b(001|002|100|107|111|1160|1660|202|203)\b/;
 const SUMMARY_ROW_PATTERN =
   /סך-?כל.*תשלומים|תשלומים.*כל-?סך|נטו\s*לתשלום|לתשלום\s*נטו|שכר\s*נטו|נטו\s*שכר/;
 const LAYOUT_ROW_PATTERN =
-  /פרוט\s*התשלומים|התשלומים\s*פרוט|תלוש\s*שכר\s*לחודש|עובד\s*ומעביד/;
+  /פרוט\s*התשלומים|התשלומים\s*פרוט|תלוש\s*שכר\s*לחודש|תלוש.*לחודש|לחודש.*תלוש|עובד\s*ומעביד/;
 
 function anyRowMatches(rows: Row[], pattern: RegExp): boolean {
   return rows.some((row) => pattern.test(rowText(row)));
@@ -30,6 +30,38 @@ export function detectHilan(doc: ExtractedPdf): DetectionResult {
   if (/חילן|Hilan/i.test(text)) {
     confidence += 0.35;
     signals.push("vendor_name");
+  }
+
+  const metadataAuthor = String(doc.metadata?.Author ?? "");
+  const metadataCreator = String(doc.metadata?.Creator ?? "");
+  const metadataSubject = String(doc.metadata?.Subject ?? "");
+  const metadataTitle = String(doc.metadata?.Title ?? "");
+  const metadataProducer = String(doc.metadata?.Producer ?? "");
+  if (/Hilan/i.test(metadataAuthor) || /Hilan/i.test(metadataCreator)) {
+    confidence += 0.35;
+    signals.push("hilan_metadata");
+  }
+  if (/Hilan/i.test(metadataAuthor) && /\d{2}\/\d{4}/.test(metadataSubject)) {
+    confidence += 0.2;
+    signals.push("hilan_subject_period");
+  }
+  if (
+    /Hilan/i.test(metadataAuthor) &&
+    /Tlush/i.test(metadataTitle) &&
+    /Synactis/i.test(metadataProducer)
+  ) {
+    confidence += 0.1;
+    signals.push("synactis_tlush_export");
+  }
+
+  if (
+    typeof doc.metadata?.Producer === "string" &&
+    /ghostscript/i.test(doc.metadata.Producer) &&
+    /תלוש/.test(text) &&
+    /לחודש/.test(text)
+  ) {
+    confidence += 0.35;
+    signals.push("ghostscript_layout");
   }
 
   if (anyRowMatches(rows, LAYOUT_ROW_PATTERN)) {

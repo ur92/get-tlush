@@ -52,7 +52,7 @@ Fixed architectural and product decisions for the payslip explainer. These are *
 | Libraries | `packages/pdf-extract`, `packages/parsers/*`, `packages/calculator`, `packages/explain`, `packages/knowledge`, `packages/auth`, `packages/analytics` |
 | Repo root (not packages) | `specs/`, `infra/`, `scripts/`, `tests/`, `.github/` |
 | Tests | Vitest; contract tests read `specs/plugins/*/manifest.json` |
-| CI | `spec:validate` → `test:contract` → `build` → deploy |
+| CI | `spec:validate` → `test:contract` → `build` (GitHub Actions); deploy via Netlify Git |
 | Agent rules | `.cursor/rules/spec-driven-design.mdc`, [AGENTS.md](../AGENTS.md) |
 
 ## 6. Authentication
@@ -68,7 +68,7 @@ Fixed architectural and product decisions for the payslip explainer. These are *
 
 | Decision | Rule |
 | -------- | ---- |
-| Store | **Amazon DynamoDB** table `salary_observations` |
+| Store | **Supabase Postgres** table `salary_observations` (production ingest only) |
 | Client payload | `specs/schemas/anonymized-record.schema.json` only |
 | Consent | **Terms checkbox at upload** (default checked); parse blocked if unchecked; analytics sent only if terms accepted for that session |
 | Client | `packages/analytics/anonymize()` before any network call; PDF never included |
@@ -78,9 +78,11 @@ Fixed architectural and product decisions for the payslip explainer. These are *
 
 | Decision | Rule |
 | -------- | ---- |
-| Frontend | Static site — S3 + CloudFront (AWS free tier target) |
+| Frontend | **Netlify** static hosting — production on `main`, integration on `next` branch deploy |
 | Backend | None required for MVP parse/explain |
-| Analytics API | Minimal serverless ingest (future); separate from PDF pipeline |
+| Analytics API | **Netlify Function** ingest → Supabase Postgres — **production (`main`) only** for MVP |
+| Deploy | Netlify Git integration; GitHub Actions validation only (no AWS deploy) |
+| Release model | Day-to-day work on `next` → `next--gettlush.netlify.app`; release PR `next` → `main` → `gettlush.netlify.app` |
 
 ## 9. Supported Vendors (MVP)
 
@@ -110,3 +112,4 @@ All UI surfaces include a non-binding disclaimer (i18n key `disclaimer.estimate`
 | ---- | ------ |
 | 2026-06-08 | Initial constitution — Phase 0 foundation |
 | 2026-06-08 | packages-only layout; auth required for /app/*; terms-at-upload analytics; AGENTS.md + Cursor SDD rule |
+| 2026-06-10 | MVP hosting pivot: Netlify (main/next/PR previews); analytics ingest via Netlify Function + Supabase; AWS account closed — legacy scripts in `infra/setup/` |

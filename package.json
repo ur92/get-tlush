@@ -8,13 +8,20 @@
   ],
   "scripts": {
     "spec:validate": "node scripts/spec-validate.mjs",
+    "fixture:from-pdf": "node scripts/fixture-from-pdf.mjs",
     "test:contract": "vitest run --config vitest.config.ts tests/contract",
     "test": "vitest run --config vitest.config.ts",
-    "build": "yarn workspaces foreach -Apt run build"
+    "build": "yarn workspaces foreach -Apt run build",
+    "dev": "netlify dev --filter @tlush/web"
+  },
+  "resolutions": {
+    "pdfjs-dist": "6.0.227"
   },
   "devDependencies": {
+    "@netlify/functions": "^3.1.10",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "netlify-cli": "^26.1.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }

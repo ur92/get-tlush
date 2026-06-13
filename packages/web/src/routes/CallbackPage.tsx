@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@tlush/auth";
+import { getAppHomePath } from "../lib/dev-routes";
 
 export function CallbackPage() {
   const { t } = useTranslation();
@@ -11,7 +12,7 @@ export function CallbackPage() {
   useEffect(() => {
     if (auth.isLoading) return;
     if (auth.isAuthenticated) {
-      navigate("/app/upload", { replace: true });
+      navigate(getAppHomePath(), { replace: true });
       return;
     }
     if (auth.error) {

@@ -1,29 +1,35 @@
-import { useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@tlush/auth";
+import { PublicPageShell } from "../components/PublicPageShell";
+import { getAppHomePath } from "../lib/dev-routes";
 
 export function LoginPage() {
   const { t } = useTranslation();
   const auth = useAuth();
 
-  useEffect(() => {
-    if (auth.isAuthenticated) return;
-  }, [auth.isAuthenticated]);
-
   if (auth.isLoading) {
-    return <p className="loading">{t("login.loading")}</p>;
+    return (
+      <PublicPageShell>
+        <p className="loading public-loading">{t("login.loading")}</p>
+      </PublicPageShell>
+    );
   }
 
   if (auth.isAuthenticated) {
-    return <Navigate to="/app/upload" replace />;
+    return <Navigate to={getAppHomePath()} replace />;
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
+    <PublicPageShell>
+      <div className="login-card glass-surface glass-surface--liquid card--elevated">
         <div className="logo">tlush</div>
         <h1>{t("login.title")}</h1>
+        {auth.error ? (
+          <p className="login-error" role="alert">
+            {auth.error.message}
+          </p>
+        ) : null}
         <button
           type="button"
           className="btn btn-google"
@@ -34,10 +40,10 @@ export function LoginPage() {
           </span>
           {t("login.sign_in_google")}
         </button>
-        <p>
+        <p className="login-terms-link">
           <Link to="/terms">{t("login.terms_link")}</Link>
         </p>
       </div>
-    </div>
+    </PublicPageShell>
   );
 }

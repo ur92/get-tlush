@@ -1,0 +1,28 @@
+[build]
+  command = "corepack enable && yarn install --immutable && yarn spec:validate && yarn build"
+  publish = "packages/web/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# SPA fallback is written to dist/_redirects at Vite build time (packages/web/vite.config.ts).
+# Do not add _redirects under public/ — netlify dev applies it and breaks Vite asset paths on :8888.
+
+[functions.a]
+  timeout = 10
+
+[functions.google-token]
+  timeout = 10
+  node_bundler = "none"
+
+[dev]
+  command = "yarn workspace @tlush/web dev"
+  targetPort = 5173
+  port = 8888
+  # Proxy all traffic to Vite; do not serve packages/web/dist in dev (SPA _redirects break /src/*).
+  framework = "#custom"
+  publish = "packages/web/dev-empty"

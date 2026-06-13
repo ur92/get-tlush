@@ -55,7 +55,7 @@ This package does **not** detect vendors, map line codes, or repair Hebrew beyon
 
 ### Extraction pipeline
 
-1. WHEN `extractPdf(file)` is called THEN pdf.js loads the document in a Web Worker when available.
+1. WHEN `extractPdf(file)` is called THEN pdf.js loads the document in a Web Worker when available, using the **legacy** `pdfjs-dist` build so document metadata (`Author`, `Subject`, `Producer`) is available in both browser and Node.
 2. WHEN each page is processed THEN `getTextContent()` items are converted to `PositionedToken` with transform matrix → `(x, y, width, height)`.
 3. WHEN adjacent items share the same baseline (|Δy| ≤ 2 px) THEN parsers may group them into rows — grouping is **not** done in this package (parser responsibility).
 4. WHEN total extractable character count across all pages is **< 50** THEN set `isScanned = true`.
@@ -71,12 +71,18 @@ Parsers and shared utilities MAY apply these transforms on `token.text`; the ext
 | `reverseVisualHebrew(text)` | Reverse visual-order Hebrew runs to logical order |
 | `normalizeDigits(text)` | Map Arabic-Indic digits to ASCII `0-9` |
 | `parseNisAmount(text)` | Parse `12,345.67` / `12.345,67` / `₪` suffixed amounts → `number` |
+| `decodeGhostscriptCustomFont(text, fontName?)` | Decode Ghostscript David/Miriam subset fonts (`g_d0_f1`–`f4`) |
+| `isGhostscriptPdf(metadata?)` | True when PDF `Producer` contains `Ghostscript` |
 
 Rules:
 
 1. WHEN token contains only Latin-1 mojibake matching Hilan pattern THEN `tryCp1255Decode` + `reverseVisualHebrew` SHOULD be applied by the Hilan parser, not globally on all tokens.
 2. WHEN token matches `(cid:\d+)` THEN leave unchanged; Merkava parser maps header labels separately.
-3. Normalization MUST be deterministic — same token text always yields same output.
+3. WHEN `metadata.Producer` matches `/ghostscript/i` OR `fontName` ends with `_f1`–`_f4` THEN `decodeGhostscriptCustomFont` MUST run while building `PositionedToken.text`:
+   - IPA range `U+02A0`–`U+02BF` maps to Hebrew via David byte offset (`byte - 0xA0` → alphabet index)
+   - Control chars `U+0014`–`U+001D` map to digits `0`–`9`; `U+0011`/`12`/`13`/`10` → `/` `,` `.` `-`
+   - Apply `reverseVisualHebrew` after glyph substitution
+4. Normalization MUST be deterministic — same token text always yields same output.
 
 ### Number and currency
 
@@ -125,6 +131,8 @@ export function tryCp1255Decode(text: string): string;
 export function reverseVisualHebrew(text: string): string;
 export function normalizeDigits(text: string): string;
 export function parseNisAmount(text: string): number | null;
+export function decodeGhostscriptCustomFont(text: string, fontName?: string): string;
+export function isGhostscriptPdf(metadata?: Record<string, unknown>): boolean;
 
 export class PdfLoadError extends Error {}
 export class PasswordProtectedPdfError extends Error {}
@@ -139,8 +147,12 @@ export class PasswordProtectedPdfError extends Error {}
 
 Golden PDFs live in `tests/fixtures/pdf/` (gitignored). Redacted token snapshots may be committed as `tests/fixtures/extracted/{vendor}-{period}.json` in Phase 1.
 
+Committed snapshot: `tests/fixtures/extracted/hilan-shiklolit-tokens.json` — summary-region tokens from the Ghostscript shiklolit payslip; used by unit tests for `decodeGhostscriptCustomFont` without the PDF.
+
 ## Changelog
 
 | Version | Date | Change |
 | ------- | ---- | ------ |
+| 1.0.2 | 2026-06-13 | Browser uses legacy pdf.js build for reliable metadata extraction |
+| 1.0.1 | 2026-06-13 | Ghostscript custom-font decode hook + `isGhostscriptPdf` |
 | 1.0.0 | 2026-06-08 | Initial spec — client-side pdf.js only |

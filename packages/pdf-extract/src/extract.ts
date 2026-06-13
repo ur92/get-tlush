@@ -1,3 +1,4 @@
+import { decodeGhostscriptCustomFont, isGhostscriptPdf } from "./hebrew.js";
 import { PasswordProtectedPdfError, PdfLoadError } from "./errors.js";
 import type { ExtractedPage, ExtractedPdf, ExtractOptions, PositionedToken } from "./types.js";
 
@@ -5,16 +6,10 @@ const SCANNED_CHAR_THRESHOLD = 50;
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 async function loadPdfJs() {
-  if (typeof globalThis.window === "undefined") {
-    return import("pdfjs-dist/legacy/build/pdf.mjs");
-  }
-
-  const pdfjs = await import("pdfjs-dist");
-  if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-      "pdfjs-dist/build/pdf.worker.min.mjs",
-      import.meta.url
-    ).toString();
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  if (typeof globalThis.window !== "undefined" && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    // Same-origin worker for Vite dev; avoid `@fs/` paths (blocked in Cursor/Glass browser).
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
   }
   return pdfjs;
 }
@@ -45,10 +40,15 @@ function isTextItem(item: unknown): item is PdfTextItem {
   return typeof item === "object" && item !== null && "str" in item;
 }
 
-function toPositionedToken(item: PdfTextItem): PositionedToken {
+function toPositionedToken(item: PdfTextItem, ghostscriptPdf: boolean): PositionedToken {
   const [, , , , x, y] = item.transform;
+  const text =
+    ghostscriptPdf || /_f[1234]$/.test(item.fontName ?? "")
+      ? decodeGhostscriptCustomFont(item.str, item.fontName)
+      : item.str;
+
   return {
-    text: item.str,
+    text,
     x,
     y,
     width: item.width,
@@ -104,6 +104,7 @@ export async function extractPdf(
     warnings.push("metadata_unavailable");
   }
 
+  const ghostscriptPdf = isGhostscriptPdf(metadata);
   const pages: ExtractedPage[] = [];
 
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
@@ -116,7 +117,7 @@ export async function extractPdf(
       if (!isTextItem(item) || item.str.length === 0) {
         continue;
       }
-      tokens.push(toPositionedToken(item));
+      tokens.push(toPositionedToken(item, ghostscriptPdf));
     }
 
     pages.push({
@@ -126,8 +127,6 @@ export async function extractPdf(
       tokens,
     });
   }
-
-  await pdf.destroy();
 
   const isScanned = countExtractableChars(pages) < SCANNED_CHAR_THRESHOLD;
   if (isScanned) {

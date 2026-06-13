@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { explainPayslip, resolveExplanationKey } from "../../packages/explain/src/index.ts";
 import { getNestedString, locales } from "../../packages/knowledge/src/index.ts";
 import type { CanonicalPayslip } from "../../packages/explain/src/types.ts";
+import { loadPluginManifests } from "./load-manifests.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -29,24 +30,25 @@ function collectKeys(obj: Record<string, unknown>, prefix = ""): string[] {
 const heKeys = new Set(collectKeys(locales.he as Record<string, unknown>));
 
 describe("explain contract", () => {
-  const fixtures = [
-    "specs/plugins/hilan/fixtures/april-2026.json",
-    "specs/plugins/hilan/fixtures/may-2026.json",
-    "specs/plugins/merkava/fixtures/march-2026-education.json",
-  ];
+  it("every manifest fixture has classified lines with Hebrew explanations", async () => {
+    const manifests = await loadPluginManifests();
 
-  it.each(fixtures)("every classified line in %s has explanationKey", (fixturePath) => {
-    const payslip = loadFixture(fixturePath);
-    const result = explainPayslip(payslip);
+    for (const { plugin, manifest } of manifests) {
+      for (const fixture of manifest.fixtures) {
+        const fixturePath = join("specs/plugins", plugin, fixture.expected);
+        const payslip = loadFixture(fixturePath);
+        const result = explainPayslip(payslip);
 
-    for (const item of result.lineItems) {
-      if (item.category === "unknown") {
-        expect(item.explanationKey).toBe("explain.unknown");
-        continue;
+        for (const item of result.lineItems) {
+          if (item.category === "unknown") {
+            expect(item.explanationKey).toBe("explain.unknown");
+            continue;
+          }
+          expect(item.explanationKey).toBeTruthy();
+          expect(item.text).toBeTruthy();
+          expect(heKeys.has(item.explanationKey)).toBe(true);
+        }
       }
-      expect(item.explanationKey).toBeTruthy();
-      expect(item.text).toBeTruthy();
-      expect(heKeys.has(item.explanationKey)).toBe(true);
     }
   });
 
@@ -61,7 +63,7 @@ describe("explain contract", () => {
   });
 
   it("waterfall includes imputed step when imputed income present", () => {
-    const payslip = loadFixture("specs/plugins/hilan/fixtures/april-2026.json");
+    const payslip = loadFixture("specs/plugins/hilan/fixtures/may-2026.json");
     const result = explainPayslip(payslip);
 
     expect(result.waterfall.some((s) => s.explanationKey === "waterfall.imputed_income")).toBe(
@@ -74,6 +76,45 @@ describe("explain contract", () => {
           item.explanationKey.startsWith("explain.imputed.")
       )
     ).toBe(true);
+  });
+
+  it("every payslip flag resolves to Hebrew text (no raw keys)", () => {
+    const ALL_FLAGS: string[] = [
+      "negative_gross",
+      "equity_vesting",
+      "equity_espp",
+      "imputed_income_present",
+      "ni_adjustment",
+      "health_adjustment",
+      "tax_correction",
+      "reserve_duty",
+      "retroactive_payment",
+      "pension_present",
+      "keren_hishtalmut_present",
+      "tax_validation_mismatch",
+      "low_parse_confidence",
+      "unknown_line_items",
+      "scanned_pdf_rejected",
+      "multi_page_ytd",
+    ];
+
+    const payslip = {
+      vendor: { id: "hilan", parserVersion: "test" },
+      period: { month: 4, year: 2026 },
+      earnings: [],
+      deductions: [],
+      totals: { grossCash: 0, taxableGross: 0, netPay: 0, incomeTax: 0, ni: 0, healthTax: 0 },
+      context: { creditPoints: 0 },
+      flags: ALL_FLAGS,
+    } as unknown as CanonicalPayslip;
+
+    const result = explainPayslip(payslip);
+    expect(result.flags).toHaveLength(ALL_FLAGS.length);
+
+    for (const f of result.flags) {
+      expect(heKeys.has(f.explanationKey), `missing Hebrew string for flag "${f.flag}" (key ${f.explanationKey})`).toBe(true);
+      expect(f.text, `flag "${f.flag}" renders raw key`).not.toBe(f.explanationKey);
+    }
   });
 
   it("negative_gross flag produces banner explanation", () => {

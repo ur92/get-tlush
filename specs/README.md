@@ -139,7 +139,26 @@ Use EARS-style criteria (WHEN / IF / WHILE / WHERE):
 
 ```bash
 yarn spec:validate    # ajv on schemas + fixtures + manifest.json
-yarn test:contract    # parser / explain / calculator contract tests
+yarn test:contract    # parser / explain / pipeline contract tests
+yarn fixture:from-pdf # regenerate golden JSON from local PDF (see below)
+```
+
+### Local PDF fixtures (gitignored)
+
+Place source payslips under `tests/fixtures/pdf/` for parse contract tests and fixture regeneration:
+
+| Source file | Copy to |
+| ----------- | ------- |
+| `FileDownload (8).pdf` | `tests/fixtures/pdf/hilan-april-2026.pdf` |
+| `123.pdf` | `tests/fixtures/pdf/merkava-march-2026.pdf` |
+| `תלוש-משכורת-שיקלולית.pdf` | `tests/fixtures/pdf/hilan-shiklolit.pdf` |
+
+Regenerate committed golden JSON after parser changes:
+
+```bash
+yarn fixture:from-pdf -- --vendor hilan --id april-2026 \
+  --pdf tests/fixtures/pdf/hilan-april-2026.pdf \
+  --out specs/plugins/hilan/fixtures/april-2026.json
 ```
 
 ## Agent & IDE rules

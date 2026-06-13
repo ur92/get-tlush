@@ -7,7 +7,7 @@ import type {
   PayslipFlag,
 } from "@tlush/parser-core";
 import { ParseError } from "@tlush/parser-core";
-import { parseNisAmount } from "@tlush/pdf-extract";
+import { parseNisAmount, isGhostscriptPdf } from "@tlush/pdf-extract";
 import codes from "./codes.json" with { type: "json" };
 import {
   amountFromRow,
@@ -15,6 +15,7 @@ import {
   buildRows,
   findAmountByRowPattern,
   findAmountNearLabel,
+  findHilanSummaryFallback,
   findLargestAmountByRowPattern,
   findRowWithLabel,
   HEBREW_MONTHS,
@@ -77,20 +78,37 @@ function mapByLabel(rawLabel: string): CodeEntry | null {
   return CODE_MAP[normalized] ?? null;
 }
 
-function parsePeriod(rows: Row[]): { month: number; year: number; label: string } {
-  const periodRow = rows.find((row) => /תלוש שכר לחודש/.test(rowText(row)));
-  if (!periodRow) {
-    throw new ParseError("Unable to locate payslip period");
+function parsePeriodFromMetadata(doc: ExtractedPdf): { month: number; year: number; label: string } | null {
+  const subject = doc.metadata?.Subject;
+  if (typeof subject === "string") {
+    const subjectMatch = subject.match(/(\d{2})\/(\d{4})/);
+    if (subjectMatch) {
+      return {
+        month: Number.parseInt(subjectMatch[1], 10),
+        year: Number.parseInt(subjectMatch[2], 10),
+        label: `${subjectMatch[1]}/${subjectMatch[2]}`,
+      };
+    }
   }
 
-  const text = rowText(periodRow);
-  const yearMatch = text.match(/\b(20\d{2})\b/);
-  const year = yearMatch ? Number.parseInt(yearMatch[1], 10) : 0;
-  const monthName = Object.keys(HEBREW_MONTHS).find((name) => text.includes(name));
-  const month = monthName ? HEBREW_MONTHS[monthName] : 0;
+  if (!isGhostscriptPdf(doc.metadata)) {
+    return null;
+  }
 
-  if (!month || !year) {
-    throw new ParseError("Unable to parse payslip period");
+  const creation = doc.metadata?.CreationDate;
+  if (typeof creation !== "string") {
+    return null;
+  }
+
+  const match = creation.match(/D:(\d{4})(\d{2})/);
+  if (!match) {
+    return null;
+  }
+
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10);
+  if (month < 1 || month > 12) {
+    return null;
   }
 
   return {
@@ -98,6 +116,64 @@ function parsePeriod(rows: Row[]): { month: number; year: number; label: string 
     year,
     label: `${String(month).padStart(2, "0")}/${year}`,
   };
+}
+
+function parsePeriod(rows: Row[], doc: ExtractedPdf): { month: number; year: number; label: string } {
+  const periodRow =
+    rows.find((row) => /תלוש\s*שכר\s*לחודש/.test(rowText(row))) ??
+    rows.find((row) => /תלוש.*לחודש|לחודש.*תלוש/.test(rowText(row)));
+  if (!periodRow) {
+    const fromMetadata = parsePeriodFromMetadata(doc);
+    if (fromMetadata) {
+      return fromMetadata;
+    }
+    throw new ParseError("Unable to locate payslip period");
+  }
+
+  const text = rowText(periodRow);
+  const labelMatch = text.match(/(\d{2})\/(\d{4})/);
+  if (labelMatch) {
+    return {
+      month: Number.parseInt(labelMatch[1], 10),
+      year: Number.parseInt(labelMatch[2], 10),
+      label: `${labelMatch[1]}/${labelMatch[2]}`,
+    };
+  }
+
+  const yearMatch = text.match(/\b(20\d{2})\b/);
+  const year = yearMatch ? Number.parseInt(yearMatch[1], 10) : 0;
+  const monthName = Object.keys(HEBREW_MONTHS).find((name) => text.includes(name));
+  const monthFromName = monthName ? HEBREW_MONTHS[monthName] : 0;
+  const monthMatch = text.match(/\b(0?[1-9]|1[0-2])\b/);
+  const month = monthFromName || (monthMatch ? Number.parseInt(monthMatch[1], 10) : 0);
+
+  if (month && year) {
+    return {
+      month,
+      year,
+      label: `${String(month).padStart(2, "0")}/${year}`,
+    };
+  }
+
+  const nearbyRows = rows.filter((row) => Math.abs(row.y - periodRow.y) <= 12);
+  for (const row of nearbyRows) {
+    const nearbyText = rowText(row);
+    const nearbyMatch = nearbyText.match(/(\d{2})\/(\d{4})/);
+    if (nearbyMatch) {
+      return {
+        month: Number.parseInt(nearbyMatch[1], 10),
+        year: Number.parseInt(nearbyMatch[2], 10),
+        label: `${nearbyMatch[1]}/${nearbyMatch[2]}`,
+      };
+    }
+  }
+
+  const fromMetadata = parsePeriodFromMetadata(doc);
+  if (fromMetadata) {
+    return fromMetadata;
+  }
+
+  throw new ParseError("Unable to parse payslip period");
 }
 
 function parseCodedLines(rows: Row[]): ParsedCodeLine[] {
@@ -195,12 +271,12 @@ function toLineItem(
   return item;
 }
 
-function extractStatutoryDeductions(rows: Row[]): {
+function extractStatutoryDeductionsFromSummaryRow(rows: Row[]): {
   incomeTax: number;
   ni: number;
   healthTax: number;
   total: number;
-} {
+} | null {
   const amountRow = rows.find((row) => {
     const amounts = amountsFromRow(row);
     const slice =
@@ -225,7 +301,7 @@ function extractStatutoryDeductions(rows: Row[]): {
   });
 
   if (!amountRow) {
-    throw new ParseError("Unable to locate statutory deduction amounts");
+    return null;
   }
 
   const amounts = amountsFromRow(amountRow);
@@ -233,6 +309,108 @@ function extractStatutoryDeductions(rows: Row[]): {
     amounts.length === 5 && amounts[0] < 20 ? amounts.slice(1) : amounts;
 
   return { incomeTax, ni, healthTax, total };
+}
+
+function amountsNearLabelRow(
+  rows: Row[],
+  labels: string[],
+  options: { minAmount?: number; yWindow?: number; excludePattern?: RegExp } = {}
+): number[] {
+  const { minAmount = 1, yWindow = 15, excludePattern } = options;
+
+  for (const row of rows) {
+    if (!labels.some((label) => rowText(row).includes(label))) {
+      continue;
+    }
+
+    const amounts = rows
+      .filter(
+        (candidate) =>
+          Math.abs(candidate.y - row.y) <= yWindow &&
+          (!excludePattern || !excludePattern.test(rowText(candidate)))
+      )
+      .flatMap((candidate) => amountsFromRow(candidate).filter((value) => value >= minAmount));
+
+    if (amounts.length > 0) {
+      return amounts;
+    }
+  }
+
+  return [];
+}
+
+function extractStatutoryDeductionsFromLabels(rows: Row[]): {
+  incomeTax: number;
+  ni: number;
+  healthTax: number;
+  total: number;
+} | null {
+  const niRow = findRowWithLabel(rows, ["ביטוח לאומי", "לאומי ביטוח", "לאוםי ביטוח"]);
+
+  let ni: number | null = null;
+  let healthTax: number | null = null;
+  let incomeTax: number | null = null;
+
+  if (niRow) {
+    const amounts = amountsFromRow(niRow).filter((value) => value >= 1).sort((a, b) => a - b);
+    if (amounts.length >= 2) {
+      healthTax = amounts[0];
+      ni = amounts[amounts.length - 1];
+    } else if (amounts.length === 1) {
+      ni = amounts[0];
+    }
+  }
+
+  if (healthTax === null) {
+    const healthAmounts = amountsNearLabelRow(rows, ["ביטוח בריאות", "בריאות", "םחלה"]);
+    if (healthAmounts.length > 0) {
+      healthTax = Math.min(...healthAmounts.filter((value) => value < 5000));
+    }
+  }
+
+  let taxAmounts = amountsNearLabelRow(rows, ["מס הכנסה", "הךןסה"], {
+    minAmount: 100,
+    excludePattern: /ביטוח|לאומי/,
+  });
+  if (taxAmounts.length === 0) {
+    taxAmounts = rows
+      .filter((row) => /הךןסה|מס\s*הכנסה/.test(rowText(row)))
+      .flatMap((row) => amountsFromRow(row).filter((value) => value >= 100));
+  }
+
+  if (taxAmounts.length > 0) {
+    incomeTax = Math.max(...taxAmounts);
+  }
+
+  if (ni === null || healthTax === null || incomeTax === null) {
+    return null;
+  }
+
+  return {
+    incomeTax,
+    ni,
+    healthTax,
+    total: incomeTax + ni + healthTax,
+  };
+}
+
+function extractStatutoryDeductions(rows: Row[]): {
+  incomeTax: number;
+  ni: number;
+  healthTax: number;
+  total: number;
+} {
+  const fromSummary = extractStatutoryDeductionsFromSummaryRow(rows);
+  if (fromSummary) {
+    return fromSummary;
+  }
+
+  const fromLabels = extractStatutoryDeductionsFromLabels(rows);
+  if (fromLabels) {
+    return fromLabels;
+  }
+
+  throw new ParseError("Unable to locate statutory deduction amounts");
 }
 
 function extractEmployer(rows: Row[]): CanonicalPayslip["employer"] {
@@ -344,7 +522,7 @@ function buildFlags(
 
 export function parseHilan(doc: ExtractedPdf): CanonicalPayslip {
   const rows = buildRows(doc);
-  const period = parsePeriod(rows);
+  const period = parsePeriod(rows, doc);
   const codedLines = parseCodedLines(rows);
   const hasEquityContext = codedLines.some((line) => line.code === "202" || line.code === "203");
 
@@ -424,18 +602,49 @@ export function parseHilan(doc: ExtractedPdf): CanonicalPayslip {
     }
   );
 
-  const totalEarnings =
+  const ghostscriptLayout = isGhostscriptPdf(doc.metadata);
+  let totalEarnings =
     findAmountNearLabel(rows, codes.summaryLabels.totalEarnings) ??
     findAmountByRowPattern(rows, /תשלומים.*כל-?סך|כל-?סך.*תשלומים/);
-  const netPay =
+  if (totalEarnings === null && ghostscriptLayout) {
+    totalEarnings = findAmountByRowPattern(rows, /תשלוםימ\s*סהך|סךומ\s*התשלומ/);
+  }
+  let netPay =
     findAmountNearLabel(rows, codes.summaryLabels.netPay) ??
-    findAmountByRowPattern(rows, /לתשלום\s*נטו|נטו\s*לתשלום/);
-  const printedNetSalary =
+    findAmountByRowPattern(rows, /לתשלום\s*נטו|נטו\s*לתשלום|בוץע|טםל/);
+  let printedNetSalary =
     findAmountNearLabel(rows, codes.summaryLabels.netSalary, true) ??
     findAmountByRowPattern(rows, /נטו\s*שכר|שכר\s*נטו/, true);
+  if (printedNetSalary === null) {
+    const negativeSummaryRow = rows.find((row) => {
+      if (row.y < 680 || row.y > 780) {
+        return false;
+      }
+      const amounts = amountsFromRow(row);
+      return amounts.length === 1 && amounts[0] < -1000;
+    });
+    if (negativeSummaryRow) {
+      printedNetSalary = amountsFromRow(negativeSummaryRow)[0];
+    }
+  }
   const totalDeductions =
     findAmountNearLabel(rows, codes.summaryLabels.statutoryDeductions) ??
-    findAmountByRowPattern(rows, /ניכויי.*חובה|חובה.*ניכויי/);
+    findAmountByRowPattern(rows, /ניכויי.*חובה|חובה.*ניכויי|חובה\s*ןיךויי/);
+
+  const summaryFallback = findHilanSummaryFallback(rows);
+  if (totalEarnings === null && summaryFallback.totalEarnings !== null && summaryFallback.netPay !== null) {
+    totalEarnings = summaryFallback.totalEarnings;
+  }
+  if (netPay === null && summaryFallback.netPay !== null) {
+    netPay = summaryFallback.netPay;
+  }
+
+  if (ghostscriptLayout && netPay !== null && (totalEarnings === null || totalEarnings < netPay)) {
+    totalEarnings = netPay + statutory.total;
+  }
+
+  const resolvedTotalDeductions = totalDeductions ?? summaryFallback.totalDeductions;
+
   if (totalEarnings === null || netPay === null) {
     throw new ParseError("Unable to reconcile payslip totals");
   }
@@ -506,7 +715,7 @@ export function parseHilan(doc: ExtractedPdf): CanonicalPayslip {
     ni: Math.abs(statutory.ni),
     healthTax: Math.abs(statutory.healthTax),
     totalEarnings,
-    totalDeductions: totalDeductions ?? statutory.total,
+    totalDeductions: resolvedTotalDeductions ?? statutory.total,
     ...(pensionEmployee !== undefined ? { pensionEmployee } : {}),
     ...(kerenEmployee !== undefined ? { kerenHishtalmutEmployee: kerenEmployee } : {}),
   };

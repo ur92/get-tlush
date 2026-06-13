@@ -67,7 +67,7 @@ async function runFixtureAssertions(
   const doc = await extractPdf(pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength));
   const detection = parser.detect(doc);
 
-  expect(detection.confidence).toBeGreaterThanOrEqual(0.75);
+  expect(detection.confidence).toBeGreaterThanOrEqual(0.8);
   const parsed = parser.parse(doc);
   expect(parsed.vendor.id).toBe(plugin);
 

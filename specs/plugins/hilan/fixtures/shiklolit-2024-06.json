@@ -1,0 +1,79 @@
+{
+  "vendor": {
+    "id": "hilan",
+    "parserVersion": "1.0.0",
+    "displayNameKey": "vendors.hilan"
+  },
+  "period": {
+    "month": 6,
+    "year": 2024,
+    "label": "06/2024"
+  },
+  "earnings": [
+    {
+      "code": "7108",
+      "rawLabel": "םשםרות זיךוי",
+      "amount": 338,
+      "category": "unknown",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "low"
+    }
+  ],
+  "deductions": [
+    {
+      "code": "INCOME_TAX",
+      "rawLabel": "מס הכנסה",
+      "labelKey": "lines.incomeTax",
+      "amount": 5488,
+      "category": "deduction.income_tax",
+      "explanationKey": "explain.deduction.incomeTax",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "NI",
+      "rawLabel": "ביטוח לאומי",
+      "labelKey": "lines.nationalInsurance",
+      "amount": 7108,
+      "category": "deduction.national_insurance",
+      "explanationKey": "explain.deduction.nationalInsurance",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    },
+    {
+      "code": "HEALTH",
+      "rawLabel": "ביטוח בריאות",
+      "labelKey": "lines.healthTax",
+      "amount": 338,
+      "category": "deduction.health_tax",
+      "explanationKey": "explain.deduction.healthTax",
+      "sourceRegion": "summary",
+      "page": 1,
+      "confidence": "high"
+    }
+  ],
+  "totals": {
+    "grossCash": 0,
+    "taxableGross": 0,
+    "netPay": 7011.12,
+    "incomeTax": 5488,
+    "ni": 7108,
+    "healthTax": 338,
+    "totalEarnings": 19945.12,
+    "totalDeductions": 12934
+  },
+  "context": {
+    "creditPoints": 0
+  },
+  "flags": [
+    "unknown_line_items"
+  ],
+  "parseMeta": {
+    "pageCount": 1,
+    "amountTolerance": 0.01,
+    "warnings": []
+  }
+}

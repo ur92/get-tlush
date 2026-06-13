@@ -47,6 +47,41 @@
       "isImputed": true
     },
     {
+      "patterns": ["תוספת מעונות"],
+      "code": "DB-DAYCARE",
+      "category": "earnings.role_supplement",
+      "labelKey": "lines.daycareSupplement",
+      "explanationKey": "explain.earnings.roleSupplement"
+    },
+    {
+      "patterns": ["החזר טלפון"],
+      "code": "DB-PHONE-REIMB",
+      "category": "earnings.other",
+      "labelKey": "lines.phoneReimbursement",
+      "explanationKey": "explain.earnings.other"
+    },
+    {
+      "patterns": ["שי לחג", "זקיפת הטבה"],
+      "code": "DB-HOLIDAY-BENEFIT",
+      "category": "earnings.other",
+      "labelKey": "lines.holidayBenefit",
+      "explanationKey": "explain.earnings.other"
+    },
+    {
+      "patterns": ["ג.חינוך", "ג. חינוך"],
+      "code": "DB-EDU-GRADE",
+      "category": "earnings.base_salary",
+      "labelKey": "lines.educationGrade",
+      "explanationKey": "explain.earnings.ofexCombined"
+    },
+    {
+      "patterns": ["שקלית אחידה"],
+      "code": "DB-SHEKEL-UNIFIED",
+      "category": "earnings.economic_adjustment",
+      "labelKey": "lines.shekelUnified",
+      "explanationKey": "explain.earnings.economicAdjustment"
+    },
+    {
       "patterns": ["מס הכנסה"],
       "code": "DB-INCOME-TAX",
       "category": "deduction.income_tax",

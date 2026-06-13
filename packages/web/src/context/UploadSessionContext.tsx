@@ -2,12 +2,16 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+import { isDevNoAuthEnabled } from "@tlush/auth";
 import type { CanonicalPayslip } from "@tlush/parser-core";
-import type { ExplanationResult } from "../lib/explain";
+import type { ExplanationResult } from "@tlush/explain";
+import { analyzePayslip } from "../lib/analyze-payslip";
+import { fetchDevQaPayslip } from "../lib/dev-qa-payslip";
 
 export type UploadSession = {
   termsAccepted: boolean;
@@ -19,6 +23,10 @@ type UploadSessionContextValue = {
   session: UploadSession;
   setSession: (session: UploadSession) => void;
   clearSession: () => void;
+  /** True while the bundled QA payslip is loading in local dev bypass mode. */
+  devBootstrapPending: boolean;
+  /** Set when dev auto-load fails; upload screen remains as fallback. */
+  devBootstrapError: string | null;
 };
 
 const defaultSession: UploadSession = {
@@ -30,7 +38,10 @@ const defaultSession: UploadSession = {
 const UploadSessionContext = createContext<UploadSessionContextValue | null>(null);
 
 export function UploadSessionProvider({ children }: { children: ReactNode }) {
+  const devBypass = isDevNoAuthEnabled();
   const [session, setSessionState] = useState<UploadSession>(defaultSession);
+  const [devBootstrapPending, setDevBootstrapPending] = useState(devBypass);
+  const [devBootstrapError, setDevBootstrapError] = useState<string | null>(null);
 
   const setSession = useCallback((next: UploadSession) => {
     setSessionState(next);
@@ -40,9 +51,39 @@ export function UploadSessionProvider({ children }: { children: ReactNode }) {
     setSessionState(defaultSession);
   }, []);
 
+  useEffect(() => {
+    if (!devBypass) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const file = await fetchDevQaPayslip();
+        const { payslip, explanation } = await analyzePayslip(file);
+        if (!cancelled) {
+          setSessionState({ termsAccepted: true, payslip, explanation });
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Dev QA payslip bootstrap failed";
+        console.error("Dev QA payslip bootstrap failed:", err);
+        if (!cancelled) {
+          setDevBootstrapError(message);
+        }
+      } finally {
+        if (!cancelled) {
+          setDevBootstrapPending(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [devBypass]);
+
   const value = useMemo(
-    () => ({ session, setSession, clearSession }),
-    [session, setSession, clearSession]
+    () => ({ session, setSession, clearSession, devBootstrapPending, devBootstrapError }),
+    [session, setSession, clearSession, devBootstrapPending, devBootstrapError]
   );
 
   return (

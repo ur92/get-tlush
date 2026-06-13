@@ -185,10 +185,12 @@ Merkava: label-pattern matching → same shared keys where category aligns.
 
 ```
 tests/contract/explain.test.ts
-  → for each plugin fixture: explain(engine, payslip)
-  → assert all classified lines have explanationKey
-  → assert required keys exist in locales/he.json
-  → snapshot insight count for golden fixtures
+  → manifest-driven: explain(engine, payslip) for every golden fixture
+  → assert all classified lines have explanationKey in locales/he.json
+
+tests/contract/pipeline.test.ts
+  → manifest-driven: schema + explain + anonymize + manifest assertions
+  → runs in CI without PDFs (golden JSON only)
 ```
 
 ## Non-goals

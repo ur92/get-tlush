@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@tlush/auth";
+import { useAuth, isDevNoAuthEnabled } from "@tlush/auth";
 import { Disclaimer } from "./Disclaimer";
+import { ThemeToggle } from "./ThemeToggle";
 
 type AppLayoutProps = {
   children: ReactNode;
@@ -15,15 +16,25 @@ export function AppLayout({ children, title, showSignOut = true }: AppLayoutProp
 
   return (
     <div className="app-layout">
-      <header className="app-header">
-        {title && <h1>{title}</h1>}
-        {showSignOut && auth.isAuthenticated && (
-          <button type="button" className="btn btn-text" onClick={() => void auth.signoutRedirect()}>
-            {t("common.sign_out")}
-          </button>
-        )}
+      <header className="app-header glass-surface glass-surface--liquid">
+        {title ? <h1>{title}</h1> : <span className="app-header__brand">tlush</span>}
+        <div className="app-header__actions">
+          <ThemeToggle />
+          {showSignOut && auth.isAuthenticated && (
+            <button type="button" className="btn btn-text" onClick={() => void auth.signoutRedirect()}>
+              {t("common.sign_out")}
+            </button>
+          )}
+        </div>
       </header>
-      <div className="app-content">{children}</div>
+      <div className="app-content">
+        {isDevNoAuthEnabled() ? (
+          <p className="dev-bypass-banner" role="status">
+            {t("dev.bypass_notice")}
+          </p>
+        ) : null}
+        {children}
+      </div>
       <Disclaimer />
     </div>
   );
