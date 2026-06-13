@@ -16,7 +16,7 @@ export function AppLayout({ children, title, showSignOut = true }: AppLayoutProp
 
   return (
     <div className="app-layout">
-      <header className="app-header glass-surface">
+      <header className="app-header glass-surface glass-surface--liquid">
         {title ? <h1>{title}</h1> : <span className="app-header__brand">tlush</span>}
         <div className="app-header__actions">
           <ThemeToggle />

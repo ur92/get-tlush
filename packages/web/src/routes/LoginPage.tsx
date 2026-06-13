@@ -22,7 +22,7 @@ export function LoginPage() {
 
   return (
     <PublicPageShell>
-      <div className="login-card glass-surface card--elevated">
+      <div className="login-card glass-surface glass-surface--liquid card--elevated">
         <div className="logo">tlush</div>
         <h1>{t("login.title")}</h1>
         {auth.error ? (
