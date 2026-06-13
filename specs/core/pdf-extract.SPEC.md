@@ -55,7 +55,7 @@ This package does **not** detect vendors, map line codes, or repair Hebrew beyon
 
 ### Extraction pipeline
 
-1. WHEN `extractPdf(file)` is called THEN pdf.js loads the document in a Web Worker when available.
+1. WHEN `extractPdf(file)` is called THEN pdf.js loads the document in a Web Worker when available, using the **legacy** `pdfjs-dist` build so document metadata (`Author`, `Subject`, `Producer`) is available in both browser and Node.
 2. WHEN each page is processed THEN `getTextContent()` items are converted to `PositionedToken` with transform matrix → `(x, y, width, height)`.
 3. WHEN adjacent items share the same baseline (|Δy| ≤ 2 px) THEN parsers may group them into rows — grouping is **not** done in this package (parser responsibility).
 4. WHEN total extractable character count across all pages is **< 50** THEN set `isScanned = true`.
@@ -153,5 +153,6 @@ Committed snapshot: `tests/fixtures/extracted/hilan-shiklolit-tokens.json` — s
 
 | Version | Date | Change |
 | ------- | ---- | ------ |
+| 1.0.2 | 2026-06-13 | Browser uses legacy pdf.js build for reliable metadata extraction |
 | 1.0.1 | 2026-06-13 | Ghostscript custom-font decode hook + `isGhostscriptPdf` |
 | 1.0.0 | 2026-06-08 | Initial spec — client-side pdf.js only |

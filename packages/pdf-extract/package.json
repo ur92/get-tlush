@@ -15,7 +15,7 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "pdfjs-dist": "^5.2.133"
+    "pdfjs-dist": "^6.0.227"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

@@ -14,6 +14,9 @@
     "build": "yarn workspaces foreach -Apt run build",
     "dev": "netlify dev --filter @tlush/web"
   },
+  "resolutions": {
+    "pdfjs-dist": "6.0.227"
+  },
   "devDependencies": {
     "@netlify/functions": "^3.1.10",
     "ajv": "^8.17.1",

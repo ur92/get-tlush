@@ -6,12 +6,8 @@ const SCANNED_CHAR_THRESHOLD = 50;
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 async function loadPdfJs() {
-  if (typeof globalThis.window === "undefined") {
-    return import("pdfjs-dist/legacy/build/pdf.mjs");
-  }
-
-  const pdfjs = await import("pdfjs-dist");
-  if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  if (typeof globalThis.window !== "undefined" && !pdfjs.GlobalWorkerOptions.workerSrc) {
     // Same-origin worker for Vite dev; avoid `@fs/` paths (blocked in Cursor/Glass browser).
     pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
   }
@@ -131,8 +127,6 @@ export async function extractPdf(
       tokens,
     });
   }
-
-  await pdf.destroy();
 
   const isScanned = countExtractableChars(pages) < SCANNED_CHAR_THRESHOLD;
   if (isScanned) {
