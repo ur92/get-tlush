@@ -15,8 +15,8 @@
       "expected": "fixtures/march-2026-education.json",
       "assertions": {
         "totals.netPay": 18693.73,
-        "totals.grossCash": 17614.25,
-        "totals.incomeTax": 4073,
+        "totals.grossCash": 19836.64,
+        "totals.incomeTax": 1142.91,
         "context.creditPoints": 9.25
       }
     }

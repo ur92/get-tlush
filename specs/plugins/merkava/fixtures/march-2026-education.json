@@ -16,6 +16,31 @@
   },
   "earnings": [
     {
+      "code": "DB-EDU-GRADE",
+      "rawLabel": "ג.חינוך",
+      "amount": 1727.67,
+      "category": "earnings.base_salary",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high",
+      "labelKey": "lines.educationGrade",
+      "explanationKey": "explain.earnings.ofexCombined",
+      "quantity": 8638.31,
+      "rate": 10,
+      "unit": "hours"
+    },
+    {
+      "code": "DB-DAYCARE",
+      "rawLabel": "תוספת מעונות",
+      "amount": 372,
+      "category": "earnings.role_supplement",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high",
+      "labelKey": "lines.daycareSupplement",
+      "explanationKey": "explain.earnings.roleSupplement"
+    },
+    {
       "code": "DB-ROLE",
       "rawLabel": "מקדם משרה",
       "amount": 1,
@@ -52,6 +77,17 @@
       "unit": "hours"
     },
     {
+      "code": "DB-SHEKEL-UNIFIED",
+      "rawLabel": "שקלית אחידה",
+      "amount": 647.51,
+      "category": "earnings.economic_adjustment",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high",
+      "labelKey": "lines.shekelUnified",
+      "explanationKey": "explain.earnings.economicAdjustment"
+    },
+    {
       "code": "DB-OFEX-SUPP",
       "rawLabel": "ש.נוספות אופק חדש",
       "amount": 99.75,
@@ -68,7 +104,7 @@
     {
       "code": "DB-ECON-LAW",
       "rawLabel": "חוק הת.כלכלית",
-      "amount": 235.82,
+      "amount": -235.82,
       "category": "earnings.economic_adjustment",
       "sourceRegion": "earnings",
       "page": 1,
@@ -78,6 +114,17 @@
       "quantity": -91.65,
       "rate": 1.2,
       "unit": "hours"
+    },
+    {
+      "code": "DB-PHONE-REIMB",
+      "rawLabel": "החזר טלפון",
+      "amount": 48.6,
+      "category": "earnings.other",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high",
+      "labelKey": "lines.phoneReimbursement",
+      "explanationKey": "explain.earnings.other"
     },
     {
       "code": "DB-KH-IMPUTED",
@@ -90,23 +137,20 @@
       "labelKey": "lines.kerenHishtalmutImputed",
       "explanationKey": "explain.imputed.kerenHishtalmut",
       "isImputed": true
+    },
+    {
+      "code": "DB-HOLIDAY-BENEFIT",
+      "rawLabel": "שי לחג",
+      "amount": 250,
+      "category": "earnings.other",
+      "sourceRegion": "earnings",
+      "page": 1,
+      "confidence": "high",
+      "labelKey": "lines.holidayBenefit",
+      "explanationKey": "explain.earnings.other"
     }
   ],
   "deductions": [
-    {
-      "code": "DB-INCOME-TAX",
-      "rawLabel": "מס הכנסה",
-      "amount": 945.6,
-      "category": "deduction.income_tax",
-      "sourceRegion": "summary",
-      "page": 1,
-      "confidence": "high",
-      "labelKey": "lines.incomeTax",
-      "explanationKey": "explain.deduction.incomeTax",
-      "quantity": 1023.55,
-      "rate": 3745,
-      "unit": "hours"
-    },
     {
       "code": "DB-NI",
       "rawLabel": "ביטוח לאומי",
@@ -136,20 +180,6 @@
       "unit": "hours"
     },
     {
-      "code": "DB-KH-INTL",
-      "rawLabel": "ק.השת)הסת( בינ\"ל",
-      "amount": 815.47,
-      "category": "deduction.keren_hishtalmut_employee",
-      "sourceRegion": "funds",
-      "page": 1,
-      "confidence": "high",
-      "labelKey": "lines.kerenHishtalmutIntl",
-      "explanationKey": "explain.deduction.kerenHishtalmut",
-      "quantity": 1630.95,
-      "rate": 19416.04,
-      "unit": "hours"
-    },
-    {
       "code": "DB-PENSION-HAREL",
       "rawLabel": "הראל מנוף - פנסיה",
       "amount": 524.29,
@@ -161,20 +191,6 @@
       "explanationKey": "explain.deduction.pension",
       "quantity": 655.36,
       "rate": 543.85,
-      "unit": "hours"
-    },
-    {
-      "code": "DB-PENSION-HAREL",
-      "rawLabel": "הראל מנוף - פנסיה",
-      "amount": 1179.11,
-      "category": "deduction.pension_employee",
-      "sourceRegion": "funds",
-      "page": 1,
-      "confidence": "high",
-      "labelKey": "lines.pensionHarel",
-      "explanationKey": "explain.deduction.pension",
-      "quantity": 1473.89,
-      "rate": 1223.13,
       "unit": "hours"
     },
     {
@@ -190,28 +206,17 @@
       "quantity": 21.03,
       "rate": 420.6,
       "unit": "hours"
-    },
-    {
-      "code": "DB-INCOME-TAX",
-      "rawLabel": "מס הכנסה",
-      "amount": 4073,
-      "category": "deduction.income_tax",
-      "sourceRegion": "summary",
-      "page": 2,
-      "confidence": "high",
-      "labelKey": "lines.incomeTax",
-      "explanationKey": "explain.deduction.incomeTax"
     }
   ],
   "totals": {
-    "grossCash": 17614.25,
-    "taxableGross": 17614.25,
+    "grossCash": 19836.64,
+    "taxableGross": 19836.64,
     "netPay": 18693.73,
-    "incomeTax": 4073,
-    "ni": 3108.58,
-    "healthTax": 2864.82,
-    "totalEarnings": 17614.25,
-    "totalDeductions": 8364.52,
+    "incomeTax": 1142.91,
+    "ni": 1023.55,
+    "healthTax": 945.6,
+    "totalEarnings": 19836.64,
+    "totalDeductions": 1351.34,
     "pensionEmployee": 524.29,
     "kerenHishtalmutEmployee": 358.99
   },

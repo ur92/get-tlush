@@ -58,17 +58,17 @@ Parse payslips from **Merkava** (מרכבה) — the Israeli public-sector payro
 
 | Field | Typical source label |
 | ----- | -------------------- |
-| `totals.grossCash` | סה"כ תשלומים / שכר ברוטו |
+| `totals.grossCash` | סה"כ תשלומים / שכר ברוטו / page-1 `נקודות זיכוי` summary row (largest amount) |
 | `totals.netPay` | נטו לתשלום / נטו לחשבון / page-1 header summary (gross − deductions, label often absent) |
-| `totals.incomeTax` | מס הכנסה |
-| `totals.ni` | ביטוח לאומי |
-| `totals.healthTax` | דמי בריאות |
+| `totals.incomeTax` | page-1 combined statutory row (`מס הכנסה` column); cap to `grossCash − netPay` when credits reduce withholding |
+| `totals.ni` | page-1 combined statutory row (`ביטוח לאומי` column) — not page-2 YTD `ניכוי` rows |
+| `totals.healthTax` | page-1 combined statutory row (`ביטוח בריאות` column) |
 | `totals.taxableGross` | שכר חייב במס / ברוטו לצורך מס |
 
 ## Acceptance Criteria
 
 1. WHEN parsing fixture `march-2026-education` THEN `vendor.id` = `merkava`.
-2. WHEN parsing fixture `march-2026-education` THEN `totals.netPay` = `14892.47` (±0.01).
+2. WHEN parsing fixture `march-2026-education` THEN `totals.netPay` = `18693.73` (±0.01) AND `totals.grossCash` = `19836.64` (±0.01).
 3. WHEN payslip ID matches `DB-\d+-\d+` THEN detection confidence ≥ `0.75`.
 4. WHEN label `משולב אופק חדש` present THEN mapped to `earnings.base_salary` with `explanationKey`.
 5. WHEN label `הפרשי ביטוח לאומי` present THEN `category` = `deduction.ni_adjustment` AND flag `ni_adjustment`.
@@ -106,4 +106,5 @@ Parse payslips from **Merkava** (מרכבה) — the Israeli public-sector payro
 
 | Version | Date | Change |
 | ------- | ---- | ------ |
+| 1.0.1 | 2026-06-13 | Fix gross/tax totals: credit-points gross row, page-1 statutory band, skip YTD fund rows |
 | 1.0.0 | 2026-06-08 | Initial spec — education/public-sector format |
