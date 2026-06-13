@@ -54,7 +54,7 @@ export function PayslipSummary({ payslip, explanation, onContinue }: PayslipSumm
         })}
       </p>
 
-      <div className="summary-card card--elevated">
+      <div className="summary-card glass-surface--liquid card--elevated">
         <p className="summary-label">{t("summary.net_to_account")}</p>
         <p className="hero-amount">{formatNis(summary.net)}</p>
       </div>

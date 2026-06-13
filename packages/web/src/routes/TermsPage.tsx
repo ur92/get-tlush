@@ -8,7 +8,7 @@ export function TermsPage() {
 
   return (
     <PublicPageShell>
-      <article className="terms-panel glass-surface card--elevated">
+      <article className="terms-panel glass-surface glass-surface--liquid card--elevated">
         <header className="terms-header">
           <Link to="/login" className="btn btn-text">
             ← {t("terms.back")}

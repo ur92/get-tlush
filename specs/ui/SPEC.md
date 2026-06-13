@@ -10,7 +10,7 @@ Hebrew RTL web interface for tlush. All user-facing strings in `locales/he.json`
 | Layout | RTL — mirrors, right-aligned text, tab order logical for RTL |
 | Typography | Heebo web font (Hebrew-friendly); CSS design tokens in `packages/web/src/index.css` |
 | Theming | Light/dark via `data-theme` on `<html>`; system default + persisted toggle (`tlush-theme` in `localStorage`) |
-| Visual style | Apple-inspired layered gradient mesh, pronounced liquid-glass surfaces (`saturate` + heavy `blur`, specular highlights), sticky glass chrome |
+| Visual style | Apple-inspired 5-color mesh background, two-tier glass (`glass-surface` / `glass-surface--liquid`), sticky glass chrome |
 | Currency | `₪` suffix, `he-IL` number formatting |
 | i18n | No hardcoded Hebrew in components — `t('key')` only |
 | Auth | Protected `/app/*` per `specs/auth/SPEC.md` |
@@ -284,7 +284,7 @@ Render content from `specs/legal/TERMS.md` (Hebrew). Accessible from login and u
 | `NetBreakdown` | Waterfall |
 | `LineItemList` | Tab line items (card rows) |
 | `ProtectedRoute` | Auth guard |
-| `ThemeToggle` | Theming — sun/moon toggle in header, login, and terms |
+| `ThemeToggle` | Theming — outline sun/moon icons (`ThemeIcons`), crossfade on toggle |
 | `PublicPageShell` | Login + Terms — sticky glass toolbar with theme toggle |
 
 ## Disclaimer
@@ -315,10 +315,12 @@ All styling is token-driven in `packages/web/src/index.css`. Brand/scale tokens 
 | Default | System `prefers-color-scheme` when no stored preference |
 | Persistence | `localStorage` key `tlush-theme`; explicit toggle overrides system |
 | System sync | When no stored preference, follows `prefers-color-scheme` changes |
-| Toggle UI | `ThemeToggle` in app header, login, and terms (`PublicPageShell`); i18n `common.theme_*` keys |
-| Glass surfaces | Liquid glass: `saturate()` + heavy `blur()` (40–48px), translucent fills, specular inset highlight, layered gradient mesh background. Sticky `.app-header`; frosted cards, tabs, drop zone, flow chart frame, disclaimer |
+| Toggle UI | `ThemeToggle` in app header, login, and terms (`PublicPageShell`); symmetric outline sun/moon icons in `components/icons/ThemeIcons.tsx`; i18n `common.theme_*` keys |
+| Mesh background | Five gradient tokens (`--color-bg-gradient-1` … `-5`) in Apple wallpaper style — teal upper-left, amber diagonal band, magenta bottom pool, cream top-right highlight, deep shadow base — layered on `body`, `body::before`, and `body::after` with blur for organic mesh; `html::before` adds fractal noise grain; light base `#f2ece6`, dark base `#0a0a0c`; optional `meshDrift` (24–30s); static when `prefers-reduced-motion: reduce` |
+| Glass surfaces (base) | `.glass-surface` — performant tier for cards, line items, tabs, charts: `saturate()` + `blur()` (40–48px), translucent fills, specular inset highlight |
+| Glass surfaces (liquid) | `.glass-surface--liquid` — hero tier only (≤5 surfaces): lower fill opacity, `--glass-blur-hero` (56px), `::before` specular rim + `::after` inner radial glow; applied to `.app-header`, `.summary-card`, `.login-card`, `.terms-panel`; `.drop-zone` adopts liquid blur/glow on hover/focus only |
 | Fallbacks | Solid `--color-surface` when `backdrop-filter` unsupported or `prefers-reduced-transparency` |
-| Mobile chrome | `theme-color` meta tags and `color-scheme: light dark` in `index.html` |
+| Mobile chrome | `theme-color` meta tags (`#f2ece6` light, `#0a0a0c` dark) and `color-scheme: light dark` in `index.html` |
 
 Payslip data flow, parsing, analytics, and auth behavior are unchanged by theming.
 
